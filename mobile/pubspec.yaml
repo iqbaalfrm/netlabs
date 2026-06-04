@@ -1,0 +1,35 @@
+name: netlabs
+description: "Netlabs - Platform ITS + LMS Praktikum Jaringan Komputer SMK"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  get: ^4.6.6
+  google_fonts: ^6.1.0
+  flutter_animate: ^4.5.0
+  dio: ^5.4.0
+  cached_network_image: ^3.3.0
+  fl_chart: ^0.67.0
+  lottie: ^3.1.0
+  shimmer: ^3.0.0
+  percent_indicator: ^4.2.3
+  flutter_svg: ^2.0.9
+  get_storage: ^2.1.1
+  lucide_icons_flutter: ^1.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
