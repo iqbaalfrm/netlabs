@@ -4,8 +4,9 @@ import 'package:get_storage/get_storage.dart';
 // Service API — satu tempat untuk semua request ke backend
 // Nanti ganti BASE_URL dengan URL production
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator
-  // static const String baseUrl = 'http://localhost:8000'; // iOS simulator
+  // URL backend production (Railway)
+  static const String baseUrl = 'https://netlabs-backend-production.up.railway.app';
+  // static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator lokal
 
   static final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
