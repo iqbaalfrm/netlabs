@@ -1,34 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Search } from 'lucide-react'
-import { api } from '../lib/api'
 
-// Dummy data fallback
 const DUMMY_SISWA = [
-  { id: '1', nis: '2122100045', nama: 'Iqbal', kelas: 'XI TKJ 2', total_chat: 124, streak_hari: 7 },
+  { id: '1', nis: '2122100045', nama: 'Muhammad Iqbal', kelas: 'XI TKJ 2', total_chat: 124, streak_hari: 7 },
   { id: '2', nis: '2122100012', nama: 'Dina Amelia', kelas: 'XI TKJ 2', total_chat: 89, streak_hari: 5 },
   { id: '3', nis: '2122100023', nama: 'Rizky Pratama', kelas: 'XI TKJ 1', total_chat: 56, streak_hari: 3 },
   { id: '4', nis: '2122100034', nama: 'Sari Wulandari', kelas: 'XI TKJ 2', total_chat: 102, streak_hari: 6 },
   { id: '5', nis: '2122100056', nama: 'Andi Setiawan', kelas: 'XI TKJ 1', total_chat: 34, streak_hari: 2 },
+  { id: '6', nis: '2122100067', nama: 'Putri Rahayu', kelas: 'XI TKJ 2', total_chat: 78, streak_hari: 4 },
+  { id: '7', nis: '2122100078', nama: 'Budi Santoso', kelas: 'XI TKJ 1', total_chat: 45, streak_hari: 3 },
+  { id: '8', nis: '2122100089', nama: 'Lina Marlina', kelas: 'XI TKJ 2', total_chat: 91, streak_hari: 5 },
 ]
 
 export default function SiswaPage() {
-  const [siswa, setSiswa] = useState(DUMMY_SISWA)
-  const [loading, setLoading] = useState(true)
   const [cari, setCari] = useState('')
 
-  useEffect(() => {
-    api.get('/api/guru/siswa')
-      .then(res => { if (res.data?.data?.length > 0) setSiswa(res.data.data) })
-      .catch(() => {}) // fallback ke dummy
-      .finally(() => setLoading(false))
-  }, [])
-
-  const filtered = siswa.filter(s =>
+  const filtered = DUMMY_SISWA.filter(s =>
     s.nama.toLowerCase().includes(cari.toLowerCase()) || s.nis.includes(cari)
-  )
-
-  if (loading) return (
-    <div className="flex items-center justify-center h-40 text-sm text-gray-400">Memuat...</div>
   )
 
   return (
@@ -56,7 +44,7 @@ export default function SiswaPage() {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Tidak ada siswa ditemukan</td></tr>
+              <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">Tidak ditemukan</td></tr>
             ) : filtered.map(s => (
               <tr key={s.id} className="border-t border-gray-50 hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-800">{s.nama}</td>

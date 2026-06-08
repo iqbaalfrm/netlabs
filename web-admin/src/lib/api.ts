@@ -1,10 +1,8 @@
 import axios from 'axios'
 
-// URL backend Railway — hardcode untuk demo
-const BASE_URL = 'https://netlabs-backend-production.up.railway.app'
-
+// URL backend Railway — pastikan tidak ada trailing slash
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? BASE_URL,
+  baseURL: 'https://netlabs-backend-production.up.railway.app',
 })
 
 api.interceptors.request.use((config) => {
@@ -31,17 +29,6 @@ export type DashboardStats = {
   total_chat: number
   rata_rata_nilai: number
   total_pertemuan: number
-}
-
-export type PertanyaanGuru = {
-  id: string
-  teks: string
-  waktu: string
-  users?: {
-    nama?: string
-    nis?: string
-    kelas?: string
-  }
 }
 
 export type Siswa = {
