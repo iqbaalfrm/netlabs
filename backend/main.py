@@ -10,14 +10,15 @@ app = FastAPI(
     title="Netlabs API",
     description="API untuk ITS + LMS Praktikum Jaringan Komputer SMK",
     version="1.0.0",
+    redirect_slashes=False,
 )
 
 # CORS — izinkan akses dari Flutter & React
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
