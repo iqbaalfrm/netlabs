@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+// URL backend Railway — hardcode untuk demo
+const BASE_URL = 'https://netlabs-backend-production.up.railway.app'
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL ?? BASE_URL,
 })
 
 api.interceptors.request.use((config) => {
