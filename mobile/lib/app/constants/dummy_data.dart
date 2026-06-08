@@ -1,4 +1,4 @@
-// Data dummy terpusat — diselaraskan dengan Fiqh Muamalah & Mitigasi Risiko Aset Kripto
+// Data dummy terpusat — murni Jaringan Komputer Dasar (tanpa unsur Fiqh/Kripto)
 class DummyData {
   // Data siswa
   static const String nama = 'Muhammad Iqbal';
@@ -12,73 +12,68 @@ class DummyData {
   static const int nilaiRataRata = 82;
   static const int streakHari = 7;
 
-  // Balasan AI dummy berdasarkan kata kunci (Fiqh Muamalah & IT Networking)
+  // Balasan AI dummy berdasarkan kata kunci (IT Networking)
   static String getBalasanAI(String pertanyaan) {
     final lower = pertanyaan.toLowerCase();
     
-    if (lower.contains('syariah') || lower.contains('fiqh') || lower.contains('muamalah') || lower.contains('hukum')) {
-      return 'Dalam perspektif Fiqh Muamalah, pemanfaatan infrastruktur jaringan komputer harus memenuhi prinsip kejujuran (amanah), kejelasan (transparansi/anti-gharar), dan keadilan.\n\n'
-          'Penerapannya dalam praktikum jaringan:\n'
-          '• Menggunakan perangkat lunak legal (menghindari ghasb/pencurian hak kekayaan intelektual).\n'
-          '• Segmentasi jaringan keuangan syariah menggunakan VLAN agar terhindar dari kebocoran data nasabah.\n'
-          '• Keandalan jaringan (redudansi) untuk meminimalisasi risiko kegagalan akad (transaksi) secara online.';
-    } else if (lower.contains('kripto') || lower.contains('crypto') || lower.contains('blockchain') || lower.contains('investasi')) {
-      return 'Aset Kripto dalam kajian Fiqh Muamalah kontemporer dipandang sebagai komoditas digital (sil\'ah) jika memenuhi kriteria memiliki nilai (tamawwul) dan kemanfaatan.\n\n'
-          'Mitigasi Risiko dalam jaringan Aset Kripto:\n'
-          '• Keamanan Kunci Privat (Private Key) melalui enkripsi end-to-end.\n'
-          '• Penggunaan subnetting terisolasi khusus untuk node validator blockchain.\n'
-          '• Implementasi Access Control List (ACL) pada firewall untuk menyaring traffic mencurigakan ke crypto wallet server.';
-    } else if (lower.contains('ip') || lower.contains('address')) {
-      return 'IP Address adalah identitas logis perangkat di jaringan komputer.\n\n'
-          'Dalam implementasi Jaringan Keuangan Syariah, alokasi IP harus dikelola secara terencana:\n'
-          '• Kelas IP Address (A, B, C) dipilih sesuai skala jaringan.\n'
-          '• Contoh IP Kelas C: 192.168.1.1 (umumnya untuk host retail/kantor cabang).\n'
-          '• Alokasi IP Statis diberikan pada server kritis seperti Sharia Core Banking, sementara DHCP digunakan untuk klien dinamis demi kemudahan manajemen.';
+    if (lower.contains('ip') || lower.contains('address')) {
+      return 'IP Address adalah alamat logis yang diberikan ke setiap perangkat dalam jaringan komputer.\n\n'
+          'Format IPv4 terdiri dari 32 bit yang dibagi menjadi 4 oktet (contoh: 192.168.1.1). Tiap oktet bernilai 0-255.\n\n'
+          'Kelas IP Address:\n'
+          '• Kelas A: 1.0.0.0 - 126.255.255.255 (Subnet mask default: 255.0.0.0)\n'
+          '• Kelas B: 128.0.0.0 - 191.255.255.255 (Subnet mask default: 255.255.0.0)\n'
+          '• Kelas C: 192.0.0.0 - 223.255.255.255 (Subnet mask default: 255.255.255.0)\n\n'
+          'Perangkat server biasanya dikonfigurasi dengan IP Statis agar tidak berubah-ubah, sedangkan perangkat klien menggunakan DHCP.';
     } else if (lower.contains('vlan')) {
-      return 'VLAN (Virtual Local Area Network) membagi satu switch fisik menjadi beberapa jaringan logis secara terpisah.\n\n'
-          'Penerapan VLAN untuk Keuangan Syariah:\n'
-          '• VLAN 10 (GURU/ADMIN) untuk mengelola data rahasia sekolah.\n'
-          '• VLAN 20 (TRANSAKSI_SYARIAH) untuk jalur transaksi keuangan halal.\n'
-          '• VLAN 30 (GUEST/SISWA) dibatasi aksesnya menggunakan router (Inter-VLAN Routing) guna mencegah penyusupan dan menjaga kepatuhan syariah (syariah compliance).';
+      return 'VLAN (Virtual Local Area Network) adalah teknologi yang memungkinkan satu switch fisik dibagi menjadi beberapa jaringan logis terpisah.\n\n'
+          'Fungsi VLAN:\n'
+          '• Memisahkan domain broadcast untuk meningkatkan efisiensi bandwidth.\n'
+          '• Meningkatkan keamanan jaringan dengan mengontrol akses antar divisi.\n'
+          '• Mempermudah manajemen jaringan secara logis tanpa memindahkan kabel fisik.\n\n'
+          'Contoh perintah membuat VLAN di switch Cisco:\n'
+          'Switch(config)# vlan 10\n'
+          'Switch(config-vlan)# name GURU';
     } else if (lower.contains('routing') || lower.contains('route')) {
-      return 'Routing menentukan jalur terbaik (best path) pengiriman paket data dari satu jaringan ke jaringan lain.\n\n'
-          'Dalam sistem transfer dana syariah, routing harus andal:\n'
-          '• Static Routing dikonfigurasi manual oleh network administrator untuk stabilitas jalur utama.\n'
-          '• Dynamic Routing (OSPF/BGP) digunakan untuk redundansi jika jalur utama terputus, guna meminimalisasi risiko penundaan transaksi (yang dilarang dalam transaksi syariah serah-terima tunai/taqabud).';
+      return 'Routing adalah proses menentukan jalur terbaik (best path) untuk mengirimkan paket data dari satu jaringan ke jaringan lain.\n\n'
+          'Jenis-jenis Routing:\n'
+          '• Static Routing: Dikonfigurasi secara manual oleh network administrator. Stabil dan hemat resource router, namun sulit dikelola pada jaringan skala besar.\n'
+          '• Dynamic Routing: Otomatis mencari rute terbaik menggunakan protokol routing seperti OSPF, RIP, atau BGP. Menyesuaikan diri secara otomatis jika ada link yang mati.';
     } else if (lower.contains('subnet')) {
-      return 'Subnetting membagi jaringan IP besar menjadi sub-jaringan (subnet) yang lebih kecil.\n\n'
-          'Manfaat Subnetting dalam Mitigasi Risiko:\n'
-          '• Mengisolasi domain broadcast demi meningkatkan keamanan data sensitif.\n'
-          '• Membatasi akses antar divisi (misal: memisahkan server Aset Kripto dari jaringan siswa).\n'
-          '• Contoh: Network 192.168.1.0/26 (Subnet Mask 255.255.255.192, menyediakan 62 host per subnet).';
+      return 'Subnetting adalah teknik membagi jaringan IP yang besar menjadi beberapa sub-jaringan (subnet) yang lebih kecil.\n\n'
+          'Tujuan Subnetting:\n'
+          '• Mengurangi lalu lintas broadcast domain.\n'
+          '• Mengoptimalkan efisiensi alokasi IP Address agar tidak ada IP yang terbuang sia-sia.\n'
+          '• Meningkatkan keamanan jaringan.\n\n'
+          'Contoh: Network 192.168.1.0/26 memiliki subnet mask 255.255.255.192 dan menyediakan 62 host yang dapat digunakan.';
     } else if (lower.contains('ping') || lower.contains('cmd') || lower.contains('trouble')) {
-      return 'Pengecekan koneksi jaringan mutlak diperlukan untuk memastikan keberlangsungan transaksi keuangan online.\n\n'
-          'Perintah CMD utama:\n'
-          '• ipconfig /all — Cek alamat IP, DNS, dan default gateway.\n'
-          '• ping [ip_tujuan] — Uji latensi jaringan. Latensi tinggi atau RTO (Request Time Out) berisiko menggagalkan transaksi online.\n'
-          '• tracert [ip_tujuan] — Lacak rute perjalanan paket data untuk menemukan titik kegagalan jalur.';
+      return 'Pengecekan koneksi jaringan menggunakan Command Prompt (CMD) sangat penting untuk troubleshooting.\n\n'
+          'Perintah dasar:\n'
+          '• ipconfig — Melihat alamat IP, subnet mask, dan default gateway komputer saat ini.\n'
+          '• ping [ip_tujuan] — Menguji konektivitas dan mengukur waktu respons (latency) ke host tujuan.\n'
+          '• tracert [ip_tujuan] — Melacak rute perjalanan paket data dari komputer lokal hingga ke tujuan untuk mendeteksi rute yang bermasalah.';
     } else if (lower.contains('topologi')) {
-      return 'Topologi jaringan menggambarkan tata letak fisik atau logis dari koneksi antar perangkat.\n\n'
-          '• Topologi Star: Menggunakan switch pusat. Sangat direkomendasikan untuk kantor Lembaga Keuangan Syariah (BMT, Bank Syariah) karena kegagalan satu klien tidak mengganggu operasional sistem secara keseluruhan.\n'
-          '• Topologi Mesh: Menyediakan jalur cadangan penuh (redundansi), krusial untuk mitigasi risiko downtime pada server perdagangan aset kripto.';
+      return 'Topologi jaringan adalah desain tata letak fisik atau logis dari koneksi antar perangkat dalam jaringan.\n\n'
+          'Jenis Topologi:\n'
+          '• Star: Semua perangkat terhubung ke switch/hub pusat. Sangat populer karena mudah di-troubleshoot dan jika satu kabel putus, perangkat lain tidak terganggu.\n'
+          '• Mesh: Setiap perangkat terhubung langsung ke semua perangkat lain. Sangat handal karena memiliki banyak jalur cadangan (redundansi), namun mahal dalam pemasangannya.';
     } else {
-      return 'Halo! Saya AI Tutor Netlabs. Silakan ajukan pertanyaan terkait materi praktikum Jaringan Komputer Dasar dan kaitannya dengan Fiqh Muamalah atau Mitigasi Risiko Aset Kripto.\n\n'
+      return 'Halo! Saya AI Tutor Netlabs. Silakan ajukan pertanyaan seputar materi praktikum Jaringan Komputer Dasar.\n\n'
           'Rekomendasi topik tanya jawab:\n'
-          '• Alokasi IP Address untuk Jaringan Keuangan Syariah\n'
-          '• Segmentasi VLAN untuk Mengamankan Wallet Aset Kripto\n'
-          '• Mitigasi Risiko downtime dengan Static/Dynamic Routing\n'
-          '• Perintah dasar CMD (ping, ipconfig, tracert)\n'
-          '• Hukum Fiqh Muamalah terkait penggunaan bandwidth dan software.';
+          '• Pembagian Kelas IP Address & Subnetting\n'
+          '• Konfigurasi VLAN di Switch Cisco\n'
+          '• Perbedaan Static Routing & Dynamic Routing (OSPF)\n'
+          '• Perintah CMD untuk troubleshooting (ping, ipconfig, tracert)\n'
+          '• Jenis-jenis Topologi Jaringan (Star, Mesh, Ring, dll.)';
     }
   }
 
   // Suggestion chips untuk chat
   static const List<String> chatSuggestions = [
-    'Bagaimana hukum Fiqh Muamalah dalam jaringan?',
-    'Cara mitigasi risiko wallet Kripto dengan VLAN?',
-    'Apa guna routing untuk transaksi syariah?',
-    'Cara subnetting IP Address?',
-    'Bagaimana mendeteksi RTO di CMD?',
+    'Apa itu IP Address?',
+    'Bagaimana cara konfigurasi VLAN?',
+    'Apa perbedaan static & dynamic routing?',
+    'Bagaimana cara menghitung subnetting?',
+    'Kenapa ping saya RTO (Request Time Out)?',
   ];
 
   // ===== DUMMY DATA PERTEMUAN (offline demo mode) =====
@@ -87,7 +82,7 @@ class DummyData {
       'id': 'p1',
       'nomor': 1,
       'nomor_urut': 1,
-      'judul': 'Pengenalan Jaringan & Kajian Syariah Teknologi',
+      'judul': 'Pengenalan Jaringan Komputer',
       'warna_hex': '#2D7DD2',
       'progress': 1.0,
       'status': 'selesai',
@@ -98,7 +93,7 @@ class DummyData {
       'id': 'p2',
       'nomor': 2,
       'nomor_urut': 2,
-      'judul': 'Pengalamatan IP & Mitigasi Risiko Aset Kripto',
+      'judul': 'Pengalamatan IP (IP Addressing)',
       'warna_hex': '#0F9B8E',
       'progress': 0.75,
       'status': 'selesai',
@@ -109,7 +104,7 @@ class DummyData {
       'id': 'p3',
       'nomor': 3,
       'nomor_urut': 3,
-      'judul': 'Konfigurasi IP & Keamanan Transaksi Muamalah',
+      'judul': 'Konfigurasi IP di Windows',
       'warna_hex': '#7B5EA7',
       'progress': 0.5,
       'status': 'aktif',
@@ -120,7 +115,7 @@ class DummyData {
       'id': 'p4',
       'nomor': 4,
       'nomor_urut': 4,
-      'judul': 'VLAN untuk Segmentasi Jaringan Syariah',
+      'judul': 'Implementasi VLAN',
       'warna_hex': '#F4A261',
       'progress': 0.0,
       'status': 'terkunci',
@@ -131,7 +126,7 @@ class DummyData {
       'id': 'p5',
       'nomor': 5,
       'nomor_urut': 5,
-      'judul': 'Static Routing & Redundansi Data Kripto',
+      'judul': 'Static Routing',
       'warna_hex': '#E05263',
       'progress': 0.0,
       'status': 'terkunci',
@@ -142,7 +137,7 @@ class DummyData {
       'id': 'p6',
       'nomor': 6,
       'nomor_urut': 6,
-      'judul': 'Dynamic Routing (OSPF) & Keandalan Akad',
+      'judul': 'Dynamic Routing (OSPF)',
       'warna_hex': '#2D7DD2',
       'progress': 0.0,
       'status': 'terkunci',
@@ -153,7 +148,7 @@ class DummyData {
       'id': 'p7',
       'nomor': 7,
       'nomor_urut': 7,
-      'judul': 'NAT untuk Akses Aman Wallet Syariah',
+      'judul': 'Network Address Translation (NAT)',
       'warna_hex': '#0F9B8E',
       'progress': 0.0,
       'status': 'terkunci',
@@ -164,7 +159,7 @@ class DummyData {
       'id': 'p8',
       'nomor': 8,
       'nomor_urut': 8,
-      'judul': 'Ujian Praktik Jaringan & Kepatuhan Syariah 1',
+      'judul': 'Ujian Praktik Jaringan Semester 1',
       'warna_hex': '#1A2B5F',
       'progress': 0.0,
       'status': 'terkunci',
@@ -178,7 +173,7 @@ class DummyData {
       'id': 'p9',
       'nomor': 9,
       'nomor_urut': 9,
-      'judul': 'Wireless LAN (WiFi) & Keamanan Mobile Banking',
+      'judul': 'Wireless LAN (WiFi)',
       'warna_hex': '#7B5EA7',
       'progress': 0.0,
       'status': 'terkunci',
@@ -189,7 +184,7 @@ class DummyData {
       'id': 'p10',
       'nomor': 10,
       'nomor_urut': 10,
-      'judul': 'Keamanan Jaringan & Proteksi Dompet Digital',
+      'judul': 'Keamanan Jaringan Dasar',
       'warna_hex': '#F4A261',
       'progress': 0.0,
       'status': 'terkunci',
@@ -200,7 +195,7 @@ class DummyData {
       'id': 'p11',
       'nomor': 11,
       'nomor_urut': 11,
-      'judul': 'Firewall & ACL untuk Server Fiqh Muamalah',
+      'judul': 'Firewall & Access Control List',
       'warna_hex': '#E05263',
       'progress': 0.0,
       'status': 'terkunci',
@@ -211,7 +206,7 @@ class DummyData {
       'id': 'p12',
       'nomor': 12,
       'nomor_urut': 12,
-      'judul': 'Monitoring Jaringan & Deteksi Fraud Kripto',
+      'judul': 'Monitoring Jaringan',
       'warna_hex': '#2D7DD2',
       'progress': 0.0,
       'status': 'terkunci',
@@ -222,7 +217,7 @@ class DummyData {
       'id': 'p13',
       'nomor': 13,
       'nomor_urut': 13,
-      'judul': 'Troubleshooting & Keandalan FinTech Syariah',
+      'judul': 'Troubleshooting Jaringan',
       'warna_hex': '#0F9B8E',
       'progress': 0.0,
       'status': 'terkunci',
@@ -233,7 +228,7 @@ class DummyData {
       'id': 'p14',
       'nomor': 14,
       'nomor_urut': 14,
-      'judul': 'Manajemen Bandwidth untuk Aplikasi Syariah',
+      'judul': 'Manajemen Bandwidth',
       'warna_hex': '#7B5EA7',
       'progress': 0.0,
       'status': 'terkunci',
@@ -244,7 +239,7 @@ class DummyData {
       'id': 'p15',
       'nomor': 15,
       'nomor_urut': 15,
-      'judul': 'Proyek Akhir Rancang Jaringan Lembaga Syariah',
+      'judul': 'Proyek Akhir Rancang Bangun Jaringan',
       'warna_hex': '#F4A261',
       'progress': 0.0,
       'status': 'terkunci',
@@ -255,7 +250,7 @@ class DummyData {
       'id': 'p16',
       'nomor': 16,
       'nomor_urut': 16,
-      'judul': 'Ujian Praktik Jaringan & Kepatuhan Syariah 2',
+      'judul': 'Ujian Praktik Jaringan Semester 2',
       'warna_hex': '#1A2B5F',
       'progress': 0.0,
       'status': 'terkunci',

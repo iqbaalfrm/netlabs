@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Plus } from 'lucide-react'
 
 const DUMMY_PERTEMUAN = [
-  { id: 'p1', nomor_urut: 1, judul: 'Pengenalan Jaringan & Kajian Syariah Teknologi', warna_hex: '#2D7DD2', topik: 4, siswa_selesai: 28 },
-  { id: 'p2', nomor_urut: 2, judul: 'Pengalamatan IP & Mitigasi Risiko Aset Kripto', warna_hex: '#0F9B8E', topik: 4, siswa_selesai: 22 },
-  { id: 'p3', nomor_urut: 3, judul: 'Konfigurasi IP & Keamanan Transaksi Muamalah', warna_hex: '#7B5EA7', topik: 3, siswa_selesai: 15 },
-  { id: 'p4', nomor_urut: 4, judul: 'VLAN untuk Segmentasi Jaringan Syariah', warna_hex: '#F4A261', topik: 4, siswa_selesai: 8 },
-  { id: 'p5', nomor_urut: 5, judul: 'Static Routing & Redundansi Data Kripto', warna_hex: '#E05263', topik: 3, siswa_selesai: 3 },
+  { id: 'p1', nomor_urut: 1, judul: 'Pengenalan Jaringan Komputer', warna_hex: '#2D7DD2', topik: 4, siswa_selesai: 28 },
+  { id: 'p2', nomor_urut: 2, judul: 'Pengalamatan IP (IP Addressing)', warna_hex: '#0F9B8E', topik: 4, siswa_selesai: 22 },
+  { id: 'p3', nomor_urut: 3, judul: 'Konfigurasi IP di Windows', warna_hex: '#7B5EA7', topik: 3, siswa_selesai: 15 },
+  { id: 'p4', nomor_urut: 4, judul: 'Implementasi VLAN', warna_hex: '#F4A261', topik: 4, siswa_selesai: 8 },
+  { id: 'p5', nomor_urut: 5, judul: 'Static Routing', warna_hex: '#E05263', topik: 3, siswa_selesai: 3 },
 ]
 
 export default function PertemuanPage() {

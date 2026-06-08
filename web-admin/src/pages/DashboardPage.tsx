@@ -3,11 +3,11 @@ import { Users, MessageCircle, Award, BookOpen } from 'lucide-react'
 // Data dummy untuk demo
 const DUMMY_STATS = { total_siswa: 32, total_chat: 124, rata_rata_nilai: 82, total_pertemuan: 5 }
 const DUMMY_PERTANYAAN = [
-  { nama: 'Muhammad Iqbal', teks: 'Bagaimana hukum Fiqh Muamalah terkait penggunaan bandwidth?', waktu: '5 menit lalu' },
-  { nama: 'Dina Amelia', teks: 'Cara mitigasi risiko kebocoran data wallet kripto menggunakan VLAN?', waktu: '12 menit lalu' },
-  { nama: 'Rizky Pratama', teks: 'Kenapa ping ke server Sharia Core Banking mengalami RTO?', waktu: '30 menit lalu' },
-  { nama: 'Sari Wulandari', teks: 'Bagaimana alokasi subnet IP kelas C untuk mengamankan data transaksi syariah?', waktu: '1 jam lalu' },
-  { nama: 'Andi Setiawan', teks: 'Bagaimana keandalan static routing dibanding dynamic untuk transaksi kripto?', waktu: '2 jam lalu' },
+  { nama: 'Muhammad Iqbal', teks: 'Apa perbedaan IPv4 dan IPv6?', waktu: '5 menit lalu' },
+  { nama: 'Dina Amelia', teks: 'Cara konfigurasi VLAN di switch Cisco?', waktu: '12 menit lalu' },
+  { nama: 'Rizky Pratama', teks: 'Kenapa ping ke gateway gagal?', waktu: '30 menit lalu' },
+  { nama: 'Sari Wulandari', teks: 'Apa fungsi subnet mask?', waktu: '1 jam lalu' },
+  { nama: 'Andi Setiawan', teks: 'Bagaimana cara static routing di Cisco?', waktu: '2 jam lalu' },
 ]
 
 export default function DashboardPage() {

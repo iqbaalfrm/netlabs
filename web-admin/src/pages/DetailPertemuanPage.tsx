@@ -5,43 +5,43 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 // Data dummy per pertemuan
 const DUMMY_DATA: Record<string, { judul: string; warna: string; topik: string[]; soal: { pertanyaan: string; jawaban_benar: string }[] }> = {
   p1: {
-    judul: 'Pengenalan Jaringan & Kajian Syariah Teknologi',
+    judul: 'Pengenalan Jaringan Komputer',
     warna: '#2D7DD2',
-    topik: ['Pengenalan Jaringan & Syariah', 'Jenis Jaringan (LAN, MAN, WAN)', 'Topologi Jaringan', 'Perangkat Keras Jaringan'],
+    topik: ['Pengertian Jaringan Komputer', 'Jenis Jaringan (LAN, MAN, WAN)', 'Topologi Jaringan', 'Perangkat Keras Jaringan'],
     soal: [
-      { pertanyaan: 'Apa tujuan utama penggunaan jaringan komputer dalam Lembaga Keuangan Syariah?', jawaban_benar: 'a' },
-      { pertanyaan: 'Jaringan yang menghubungkan kantor pusat Bank Syariah Nasional dengan kantor cabang disebut?', jawaban_benar: 'c' },
-      { pertanyaan: 'Topologi jaringan yang paling aman dan stabil untuk menghindari risiko downtime transaksi online adalah?', jawaban_benar: 'c' },
-      { pertanyaan: 'Perangkat yang digunakan untuk merutekan paket transaksi keuangan dengan aman adalah?', jawaban_benar: 'c' },
-      { pertanyaan: 'Penggunaan koneksi internet publik untuk transaksi perbankan syariah tanpa enkripsi melanggar prinsip?', jawaban_benar: 'c' },
+      { pertanyaan: 'Apa yang dimaksud jaringan komputer?', jawaban_benar: 'a' },
+      { pertanyaan: 'Jaringan satu kota disebut?', jawaban_benar: 'b' },
+      { pertanyaan: 'Topologi paling umum?', jawaban_benar: 'c' },
+      { pertanyaan: 'Perangkat yang hubungkan dua jaringan?', jawaban_benar: 'c' },
+      { pertanyaan: 'Contoh WAN?', jawaban_benar: 'c' },
     ]
   },
   p2: {
-    judul: 'Pengalamatan IP & Mitigasi Risiko Aset Kripto',
+    judul: 'Pengalamatan IP (IP Addressing)',
     warna: '#0F9B8E',
-    topik: ['Pengertian IP Address', 'Kelas IP Address (A, B, C)', 'IP Public vs IP Private', 'Subnetting & Mitigasi Risiko'],
+    topik: ['Pengertian IP Address', 'Kelas IP Address (A, B, C)', 'IP Public vs IP Private', 'Subnetting Dasar'],
     soal: [
-      { pertanyaan: 'Panjang alamat IPv4 yang digunakan untuk mengidentifikasi host di jaringan adalah?', jawaban_benar: 'b' },
-      { pertanyaan: 'IP Address 192.168.10.1 yang sering digunakan di jaringan lokal tergolong kelas?', jawaban_benar: 'c' },
-      { pertanyaan: 'Untuk mitigasi risiko serangan hacker, IP address private manakah yang aman digunakan di dalam jaringan lokal BMT?', jawaban_benar: 'b' },
-      { pertanyaan: 'Subnet mask default untuk IP kelas C demi efisiensi alokasi host adalah?', jawaban_benar: 'c' },
-      { pertanyaan: 'Dalam pengelolaan blockchain aset kripto syariah, tujuan dari subnetting adalah?', jawaban_benar: 'b' },
+      { pertanyaan: 'Berapa bit IPv4?', jawaban_benar: 'b' },
+      { pertanyaan: 'IP 192.168.1.1 kelas?', jawaban_benar: 'c' },
+      { pertanyaan: 'IP Private?', jawaban_benar: 'b' },
+      { pertanyaan: 'Subnet mask kelas C?', jawaban_benar: 'c' },
+      { pertanyaan: 'Tujuan subnetting?', jawaban_benar: 'b' },
     ]
   },
   p3: {
-    judul: 'Konfigurasi IP & Keamanan Transaksi Muamalah',
+    judul: 'Konfigurasi IP di Windows',
     warna: '#7B5EA7',
-    topik: ['Setting IP Manual di Windows', 'Verifikasi Koneksi dengan CMD', 'Troubleshooting Jaringan'],
+    topik: ['Setting IP Manual di Windows', 'Verifikasi dengan CMD', 'Troubleshooting Koneksi'],
     soal: [
-      { pertanyaan: 'Perintah CMD untuk memverifikasi konfigurasi IP client sebelum melakukan transfer dana syariah?', jawaban_benar: 'b' },
-      { pertanyaan: 'Perintah pengujian latency untuk mitigasi risiko kegagalan serah terima (taqabud) pada transaksi online?', jawaban_benar: 'b' },
-      { pertanyaan: 'Alamat loopback IP 127.0.0.1 digunakan untuk?', jawaban_benar: 'c' },
-      { pertanyaan: 'Jika hasil ping ke server trading kripto menunjukkan RTO (Request Time Out), tindakan pertama adalah?', jawaban_benar: 'b' },
-      { pertanyaan: 'Dalam transaksi syariah online, peran Default Gateway adalah sebagai?', jawaban_benar: 'b' },
+      { pertanyaan: 'Perintah lihat IP?', jawaban_benar: 'b' },
+      { pertanyaan: 'Perintah test koneksi?', jawaban_benar: 'b' },
+      { pertanyaan: 'IP loopback?', jawaban_benar: 'c' },
+      { pertanyaan: 'Ping gateway gagal berarti?', jawaban_benar: 'b' },
+      { pertanyaan: 'Fungsi default gateway?', jawaban_benar: 'b' },
     ]
   },
-  p4: { judul: 'VLAN untuk Segmentasi Jaringan Syariah', warna: '#F4A261', topik: ['Pengertian VLAN', 'Konfigurasi VLAN di Switch', 'Inter-VLAN Routing', 'Verifikasi VLAN'], soal: [] },
-  p5: { judul: 'Static Routing & Redundansi Data Kripto', warna: '#E05263', topik: ['Konsep Routing', 'Konfigurasi Static Route', 'Verifikasi Routing Table'], soal: [] },
+  p4: { judul: 'Implementasi VLAN', warna: '#F4A261', topik: ['Pengertian VLAN', 'Konfigurasi Switch', 'Inter-VLAN Routing', 'Verifikasi VLAN'], soal: [] },
+  p5: { judul: 'Static Routing', warna: '#E05263', topik: ['Konsep Routing', 'Konfigurasi Static Route', 'Verifikasi Routing Table'], soal: [] },
 }
 
 export default function DetailPertemuanPage() {
