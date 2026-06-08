@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import PertemuanPage from './pages/PertemuanPage'
 import DetailPertemuanPage from './pages/DetailPertemuanPage'
 import SiswaPage from './pages/SiswaPage'
+import RagPage from './pages/RagPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/pertemuan" element={<ProtectedRoute><PertemuanPage /></ProtectedRoute>} />
       <Route path="/pertemuan/:id" element={<ProtectedRoute><DetailPertemuanPage /></ProtectedRoute>} />
       <Route path="/siswa" element={<ProtectedRoute><SiswaPage /></ProtectedRoute>} />
+      <Route path="/rag" element={<ProtectedRoute><RagPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

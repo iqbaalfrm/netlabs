@@ -1,11 +1,12 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, Users, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Users, Database, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 const menuItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/pertemuan', icon: BookOpen, label: 'Pertemuan' },
   { to: '/siswa', icon: Users, label: 'Data Siswa' },
+  { to: '/rag', icon: Database, label: 'Knowledge Base RAG' },
 ]
 
 // Layout utama — sidebar + topbar + konten
@@ -27,6 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (path === '/') return 'Dashboard'
     if (path.startsWith('/pertemuan')) return 'Pertemuan'
     if (path.startsWith('/siswa')) return 'Data Siswa'
+    if (path.startsWith('/rag')) return 'Knowledge Base RAG'
     return 'Netlabs'
   }
 
