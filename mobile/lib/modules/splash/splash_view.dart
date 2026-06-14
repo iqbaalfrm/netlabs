@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/routes/app_routes.dart';
 
-// Halaman splash — cek token, arahkan ke halaman yang tepat
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
 
@@ -40,18 +38,28 @@ class _SplashViewState extends State<SplashView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 64, height: 64,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(16)),
-              child: const Icon(Icons.hub_rounded, size: 36, color: Colors.white),
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.hub_rounded, size: 40, color: Colors.white),
             ),
-            const SizedBox(height: 16),
-            Text('Netlabs', style: GoogleFonts.plusJakartaSans(
-              fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 6),
-            Text('Praktikum Jaringan Komputer', style: GoogleFonts.plusJakartaSans(
-              fontSize: 13, color: Colors.white70)),
+            const SizedBox(height: 20),
+            Text(
+              'Netlabs',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Praktikum Jaringan Komputer',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
+              ),
+            ),
           ],
         ),
       ),

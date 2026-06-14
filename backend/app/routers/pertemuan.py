@@ -1,17 +1,42 @@
-# Router pertemuan — CRUD pertemuan praktikum
+# Router pertemuan — CRUD pertemuan praktikum dengan pagination
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from app.database import db
 from app.middleware.auth import get_current_user, guru_only
 from app.schemas import PertemuanCreate, PertemuanUpdate
+from app.helpers.pagination import paginate_params, paginate_response
 
 router = APIRouter()
 
 
 @router.get("/")
-async def ambil_semua(user: dict = Depends(get_current_user)):
-    """Ambil semua pertemuan, urut berdasarkan nomor"""
-    result = db.table("pertemuan").select("*").order("nomor_urut").execute()
-    return {"data": result.data or []}
+async def ambil_semua(
+    page: int = 1,
+    limit: int = 10,
+    search: Optional[str] = None,
+    user: dict = Depends(get_current_user),
+):
+    """Ambil semua pertemuan dengan pagination."""
+    page, limit = paginate_params(page, limit)
+
+    query = db.table("pertemuan").select("*", count="exact")
+    if search:
+        query = query.ilike("judul", f"%{search}%")
+    query = query.order("nomor_urut")
+
+    # Get total
+    count_result = query.execute()
+    total = count_result.count or 0
+
+    # Get paginated data
+    offset = (page - 1) * limit
+    data_query = db.table("pertemuan").select("*")
+    if search:
+        data_query = data_query.ilike("judul", f"%{search}%")
+    data_query = data_query.order("nomor_urut").range(offset, offset + limit - 1)
+    result = data_query.execute()
+
+    return paginate_response(result.data or [], page, limit, total)
 
 
 @router.get("/{pertemuan_id}")
@@ -27,7 +52,7 @@ async def ambil_detail(pertemuan_id: str, user: dict = Depends(get_current_user)
 
     data = pertemuan.data
     data["daftar_topik"] = topik.data or []
-    return {"data": data}
+    return {"data": data, "message": "OK"}
 
 
 @router.post("/")
@@ -58,4 +83,4 @@ async def update_pertemuan(pertemuan_id: str, request: PertemuanUpdate, user: di
 async def hapus_pertemuan(pertemuan_id: str, user: dict = Depends(guru_only)):
     """Hapus pertemuan (guru only)"""
     db.table("pertemuan").delete().eq("id", pertemuan_id).execute()
-    return {"message": "Pertemuan berhasil dihapus"}
+    return {"data": None, "message": "Pertemuan berhasil dihapus"}

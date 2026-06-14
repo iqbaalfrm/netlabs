@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../app/theme/app_colors.dart';
 import 'pertemuan_controller.dart';
 import 'pertemuan_detail_view.dart';
 
-// Halaman daftar pertemuan — GetView + PertemuanController
 class PertemuanView extends GetView<PertemuanController> {
   const PertemuanView({super.key});
 
@@ -16,125 +14,181 @@ class PertemuanView extends GetView<PertemuanController> {
       Get.put(PertemuanController());
     }
 
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: AppColors.bgLight,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Obx(() {
-          // Loading state
           if (controller.sedangMemuat.value) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary));
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text('Materi Praktikum',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-              ),
-              const SizedBox(height: 16),
-              _buildBannerAktif(),
-              const SizedBox(height: 16),
-              _buildTabSemester(),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
-                  itemCount: controller.daftarPertemuan.length,
-                  itemBuilder: (ctx, i) =>
-                      _pertemuanItem(ctx, controller.daftarPertemuan[i]),
+          return Column(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              child: Row(children: [
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Materi Praktikum', style: tt.headlineMedium),
+                    const SizedBox(height: 4),
+                    Text('Jaringan Komputer Dasar', style: tt.bodyMedium),
+                  ],
+                )),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(LucideIcons.trophy, size: 13, color: AppColors.primary),
+                    const SizedBox(width: 5),
+                    Text('3/5 selesai',
+                      style: tt.labelSmall?.copyWith(
+                        color: AppColors.primary, fontWeight: FontWeight.w700)),
+                  ]),
                 ),
+              ]),
+            ),
+
+            const SizedBox(height: 20),
+            _buildBannerAktif(tt),
+            const SizedBox(height: 20),
+            _buildTabSemester(tt),
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 80),
+                itemCount: controller.daftarPertemuan.length,
+                itemBuilder: (ctx, i) =>
+                    _pertemuanItem(ctx, controller.daftarPertemuan[i], i, tt),
               ),
-            ],
-          );
+            ),
+          ]);
         }),
       ),
     );
   }
 
-  Widget _buildBannerAktif() {
+  Widget _buildBannerAktif(TextTheme tt) {
     final p = controller.pertemuanAktif;
     if (p.isEmpty) return const SizedBox.shrink();
     final progress = (p['progress'] as num?)?.toDouble() ?? 0.0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.primary, borderRadius: BorderRadius.circular(14)),
+          color: AppColors.primaryDark,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Row(children: [
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Lanjutkan', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.white70)),
-              const SizedBox(height: 4),
-              Text('Pertemuan ${p['nomor_urut'] ?? ''}',
-                style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-              Text(p['judul'] ?? '', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.white70)),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text('Lanjutkan',
+                  style: tt.labelSmall?.copyWith(
+                    color: Colors.white, fontWeight: FontWeight.w700)),
+              ),
               const SizedBox(height: 10),
+              Text('Pertemuan ${p['nomor_urut'] ?? ''}',
+                style: tt.titleMedium?.copyWith(color: Colors.white)),
+              const SizedBox(height: 2),
+              Text(p['judul'] ?? '',
+                style: tt.bodyMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7))),
+              const SizedBox(height: 14),
               Row(children: [
                 Expanded(child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(value: progress,
-                    backgroundColor: Colors.white24, color: Colors.white, minHeight: 4))),
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    valueColor: const AlwaysStoppedAnimation(Colors.white),
+                    minHeight: 5,
+                  ),
+                )),
                 const SizedBox(width: 10),
                 Text('${(progress * 100).toInt()}%',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                  style: tt.labelSmall?.copyWith(
+                    color: Colors.white, fontWeight: FontWeight.w700)),
               ]),
-            ]),
+            ],
+          )),
+          const SizedBox(width: 16),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(LucideIcons.play, size: 20, color: Colors.white),
           ),
-          const SizedBox(width: 12),
-          Container(width: 40, height: 40,
-            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10)),
-            child: const Icon(LucideIcons.play, size: 18, color: Colors.white)),
         ]),
       ),
     );
   }
 
-  Widget _buildTabSemester() {
+  Widget _buildTabSemester(TextTheme tt) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
         padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
         child: Row(children: [
-          _tabItem('Semester 1', 0),
-          _tabItem('Semester 2', 1),
+          _tabItem('Semester 1', 0, tt),
+          _tabItem('Semester 2', 1, tt),
         ]),
       ),
     );
   }
 
-  Widget _tabItem(String label, int idx) {
+  Widget _tabItem(String label, int idx, TextTheme tt) {
     return Obx(() {
       final aktif = controller.semesterAktif.value == idx;
-      return Expanded(
-        child: GestureDetector(
-          onTap: () => controller.gantiSemester(idx),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: aktif ? AppColors.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(8)),
-            child: Center(child: Text(label,
-              style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600,
-                color: aktif ? Colors.white : AppColors.textSecondary))),
+      return Expanded(child: GestureDetector(
+        onTap: () => controller.gantiSemester(idx),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: aktif ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
+          child: Center(child: Text(label,
+            style: tt.labelLarge?.copyWith(
+              color: aktif ? Colors.white : AppColors.textSecondary))),
         ),
-      );
+      ));
     });
   }
 
-  Widget _pertemuanItem(BuildContext context, Map<String, dynamic> data) {
+  Widget _pertemuanItem(BuildContext context,
+      Map<String, dynamic> data, int index, TextTheme tt) {
     final terkunci = data['status'] == 'terkunci';
     final selesai = data['status'] == 'selesai';
     final aktif = data['status'] == 'aktif';
     final progress = (data['progress'] as num?)?.toDouble() ?? 0.0;
+    final nomor = (data['nomor_urut'] as int?) ?? index + 1;
+    final color = terkunci
+        ? AppColors.border
+        : AppColors.pertemuanColors[(nomor - 1) % AppColors.pertemuanColors.length];
 
     return GestureDetector(
       onTap: terkunci ? null : () {
@@ -142,63 +196,92 @@ class PertemuanView extends GetView<PertemuanController> {
           builder: (_) => PertemuanDetailView(pertemuan: data)));
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: terkunci ? Colors.white.withValues(alpha: 0.6) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: aktif ? AppColors.primary : AppColors.border, width: aktif ? 1.5 : 1)),
-        child: Column(children: [
-          // Banner atas
+          color: terkunci
+              ? AppColors.surface.withValues(alpha: 0.6)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: aktif ? color : AppColors.border,
+            width: aktif ? 2 : 1),
+        ),
+        child: Row(children: [
           Container(
-            height: 48, width: double.infinity,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: terkunci ? AppColors.border.withValues(alpha: 0.5) : AppColors.primary.withValues(alpha: 0.06),
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(13), topRight: Radius.circular(13))),
-            child: Row(children: [
-              const SizedBox(width: 14),
-              Icon(terkunci ? LucideIcons.lock : selesai ? LucideIcons.circleCheck : LucideIcons.bookOpen,
-                size: 16, color: terkunci ? AppColors.textSecondary : AppColors.primary),
-              const SizedBox(width: 8),
-              Text('Pertemuan ${data['nomor_urut'] ?? ''}',
-                style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600,
-                  color: terkunci ? AppColors.textSecondary : AppColors.primary)),
-              const Spacer(),
-              if (selesai) Padding(padding: const EdgeInsets.only(right: 14),
-                child: Text('Selesai ✓', style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary))),
-              if (aktif) Padding(padding: const EdgeInsets.only(right: 14),
-                child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(6)),
-                  child: Text('Aktif', style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white)))),
-            ]),
+              color: terkunci
+                  ? AppColors.background
+                  : color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(child: terkunci
+              ? const Icon(LucideIcons.lock, size: 16, color: AppColors.textSecondary)
+              : Text('$nomor',
+                  style: TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w800, color: color))),
           ),
-          // Konten
-          Padding(padding: const EdgeInsets.all(14), child: Row(children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(data['judul'] ?? '', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600,
-                color: terkunci ? AppColors.textSecondary : AppColors.textPrimary)),
-              const SizedBox(height: 6),
+          const SizedBox(width: 14),
+
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(data['judul'] ?? '',
+                style: tt.bodyLarge?.copyWith(
+                  color: terkunci ? AppColors.textSecondary : AppColors.textPrimary),
+                maxLines: 1, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 4),
               Row(children: [
                 if ((data['topik'] ?? 0) > 0) ...[
-                  Icon(LucideIcons.fileText, size: 12, color: AppColors.textSecondary), const SizedBox(width: 4),
-                  Text('${data['topik']} topik', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textSecondary)),
-                  const SizedBox(width: 12),
+                  Text('${data['topik']} topik', style: tt.labelSmall),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 3, height: 3,
+                    decoration: const BoxDecoration(
+                      color: AppColors.textSecondary,
+                      shape: BoxShape.circle)),
+                  const SizedBox(width: 8),
                 ],
-                if (!terkunci && (data['topik'] ?? 0) > 0) ...[
-                  Icon(LucideIcons.clock, size: 12, color: AppColors.textSecondary), const SizedBox(width: 4),
-                  Text('~${data['topik'] * 10} menit', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textSecondary)),
-                ],
+                if (selesai)
+                  Text('Selesai',
+                    style: tt.labelSmall?.copyWith(
+                      color: AppColors.success, fontWeight: FontWeight.w700))
+                else if (aktif)
+                  Row(children: [
+                    Container(
+                      width: 6, height: 6,
+                      decoration: BoxDecoration(
+                        color: color, shape: BoxShape.circle)),
+                    const SizedBox(width: 4),
+                    Text('Sedang dipelajari',
+                      style: tt.labelSmall?.copyWith(
+                        color: color, fontWeight: FontWeight.w700)),
+                  ])
+                else if (terkunci)
+                  Text('Terkunci', style: tt.labelSmall)
+                else
+                  Text('Belum dimulai', style: tt.labelSmall),
               ]),
               if (!terkunci && progress > 0) ...[
                 const SizedBox(height: 10),
-                ClipRRect(borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(value: progress,
-                    backgroundColor: AppColors.border, color: AppColors.primary, minHeight: 3)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: color.withValues(alpha: 0.1),
+                    valueColor: AlwaysStoppedAnimation(color),
+                    minHeight: 4,
+                  ),
+                ),
               ],
-            ])),
-            if (!terkunci) Icon(LucideIcons.chevronRight, size: 16, color: AppColors.textSecondary),
-          ])),
+            ],
+          )),
+
+          if (!terkunci)
+            const Icon(LucideIcons.chevronRight,
+              size: 16, color: AppColors.textSecondary),
         ]),
       ),
     );

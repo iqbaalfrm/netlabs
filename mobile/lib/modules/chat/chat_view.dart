@@ -1,68 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/constants/dummy_data.dart';
 import 'chat_controller.dart';
 
-// Halaman AI Chat — menggunakan GetView + ChatController
 class ChatView extends GetView<ChatController> {
   const ChatView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Pastikan controller terdaftar
     if (!Get.isRegistered<ChatController>()) {
       Get.put(ChatController());
     }
 
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: AppColors.bgLight,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Container(
-              width: 34, height: 34,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(10)),
-              child: const Icon(LucideIcons.bot, size: 16, color: Colors.white),
+        title: Row(children: [
+          Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('AI Tutor',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14, fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary)),
-                Row(
-                  children: [
-                    Container(width: 6, height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF34C759), shape: BoxShape.circle)),
-                    const SizedBox(width: 4),
-                    Text('Online',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
-        ),
+            child: const Icon(LucideIcons.bot, size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('AI Tutor', style: tt.bodyLarge),
+              Row(children: [
+                Container(width: 6, height: 6,
+                  decoration: const BoxDecoration(
+                    color: AppColors.success, shape: BoxShape.circle)),
+                const SizedBox(width: 4),
+                Text('Online', style: tt.labelSmall),
+              ]),
+            ],
+          ),
+        ]),
       ),
       body: Column(
         children: [
-          // Area chat
           Expanded(
             child: Obx(() => ListView.builder(
               controller: controller.scrollController,
@@ -71,64 +55,57 @@ class ChatView extends GetView<ChatController> {
                   (controller.aiMenulis.value ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == controller.daftarPesan.length) {
-                  return _buildTypingIndicator();
+                  return _buildTypingIndicator(tt);
                 }
                 final pesan = controller.daftarPesan[index];
-                return _buildBubble(context, pesan['dariSiswa'], pesan['teks']);
+                return _buildBubble(context, pesan['dariSiswa'], pesan['teks'], tt);
               },
             )),
           ),
-
-          // Suggestion chips
           Obx(() => controller.daftarPesan.length <= 1
-              ? _buildSuggestions()
+              ? _buildSuggestions(tt)
               : const SizedBox.shrink()),
-
-          // Input bar
-          _buildInputBar(),
+          _buildInputBar(tt),
         ],
       ),
     );
   }
 
-  // Bubble chat
-  Widget _buildBubble(BuildContext context, bool dariSiswa, String teks) {
+  Widget _buildBubble(BuildContext context, bool dariSiswa, String teks, TextTheme tt) {
     return Align(
       alignment: dariSiswa ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: dariSiswa ? AppColors.primary : Colors.white,
+          color: dariSiswa ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(14),
-            topRight: const Radius.circular(14),
-            bottomLeft: Radius.circular(dariSiswa ? 14 : 4),
-            bottomRight: Radius.circular(dariSiswa ? 4 : 14),
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(dariSiswa ? 16 : 4),
+            bottomRight: Radius.circular(dariSiswa ? 4 : 16),
           ),
           border: dariSiswa ? null : Border.all(color: AppColors.border),
         ),
         child: Text(teks,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
+          style: tt.bodyMedium?.copyWith(
             color: dariSiswa ? Colors.white : AppColors.textPrimary,
             height: 1.4)),
       ),
     );
   }
 
-  // Typing indicator
-  Widget _buildTypingIndicator() {
+  Widget _buildTypingIndicator(TextTheme tt) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
@@ -140,17 +117,14 @@ class ChatView extends GetView<ChatController> {
                 strokeWidth: 2, color: AppColors.primary),
             ),
             const SizedBox(width: 8),
-            Text('Mengetik...',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12, color: AppColors.textSecondary)),
+            Text('Mengetik...', style: tt.labelSmall),
           ],
         ),
       ),
     );
   }
 
-  // Suggestion chips
-  Widget _buildSuggestions() {
+  Widget _buildSuggestions(TextTheme tt) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Wrap(
@@ -162,12 +136,13 @@ class ChatView extends GetView<ChatController> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.border)),
+                color: AppColors.accent,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
               child: Text(saran,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12, color: AppColors.primary)),
+                style: tt.labelSmall?.copyWith(
+                  color: AppColors.primary, fontWeight: FontWeight.w600)),
             ),
           );
         }).toList(),
@@ -175,50 +150,49 @@ class ChatView extends GetView<ChatController> {
     );
   }
 
-  // Input bar
-  Widget _buildInputBar() {
+  Widget _buildInputBar(TextTheme tt) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: AppColors.bgLight,
-                  borderRadius: BorderRadius.circular(10)),
-                child: TextField(
-                  controller: controller.inputController,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: 'Tanya sesuatu...',
-                    hintStyle: GoogleFonts.plusJakartaSans(
-                      fontSize: 13, color: AppColors.textSecondary),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12)),
-                  onSubmitted: (_) => controller.kirimPesan(),
+        child: Row(children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: TextField(
+                controller: controller.inputController,
+                style: tt.bodyMedium?.copyWith(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Tanya sesuatu...',
+                  border: InputBorder.none,
+                  hintStyle: tt.bodyMedium,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
+                onSubmitted: (_) => controller.kirimPesan(),
               ),
             ),
-            const SizedBox(width: 10),
-            GestureDetector(
-              onTap: () => controller.kirimPesan(),
-              child: Container(
-                width: 40, height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(10)),
-                child: const Icon(LucideIcons.sendHorizontal,
-                    size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: () => controller.kirimPesan(),
+            child: Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: const Icon(LucideIcons.sendHorizontal,
+                size: 18, color: Colors.white),
             ),
-          ],
-        ),
+          ),
+        ]),
       ),
     );
   }

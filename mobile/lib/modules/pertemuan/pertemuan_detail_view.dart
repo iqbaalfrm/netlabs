@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../app/theme/app_colors.dart';
 import '../kuis/kuis_view.dart';
 
-// Halaman detail pertemuan — daftar topik + kuis
-// Muncul saat siswa tap salah satu pertemuan
 class PertemuanDetailView extends StatefulWidget {
   final Map<String, dynamic> pertemuan;
   const PertemuanDetailView({super.key, required this.pertemuan});
@@ -15,17 +12,14 @@ class PertemuanDetailView extends StatefulWidget {
 }
 
 class _PertemuanDetailViewState extends State<PertemuanDetailView> {
-  // Data topik dummy (nanti dari API)
   late List<Map<String, dynamic>> daftarTopik;
 
   @override
   void initState() {
     super.initState();
-    // Generate topik berdasarkan jumlah
     daftarTopik = _generateTopik(widget.pertemuan['nomor'], widget.pertemuan['topik']);
   }
 
-  // Generate data topik dummy berdasarkan nomor pertemuan
   List<Map<String, dynamic>> _generateTopik(int nomorPertemuan, int jumlah) {
     final topikData = {
       1: ['Pengertian Jaringan Komputer', 'Jenis Jaringan (LAN, MAN, WAN)', 'Topologi Jaringan', 'Perangkat Keras Jaringan'],
@@ -39,7 +33,6 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
     final progress = widget.pertemuan['progress'] as double;
 
     return List.generate(judulList.length, (i) {
-      // Hitung berapa topik yang sudah selesai berdasarkan progress
       final selesaiCount = (progress * judulList.length).round();
       return {
         'nomor': i + 1,
@@ -49,10 +42,8 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
     });
   }
 
-  // Cek apakah semua topik sudah selesai
   bool get semuaTopikSelesai => daftarTopik.every((t) => t['selesai'] == true);
 
-  // Tandai topik selesai
   void _tandaiSelesai(int index) {
     setState(() {
       daftarTopik[index]['selesai'] = true;
@@ -61,45 +52,32 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: AppColors.bgLight,
-      // AppBar
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Pertemuan ${widget.pertemuan['nomor']}',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 16, fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary)),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
-        ),
+        title: Text('Pertemuan ${widget.pertemuan['nomor']}'),
       ),
       body: Column(
         children: [
-          // Konten scrollable
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header info
-                  _buildHeaderInfo(),
-                  const SizedBox(height: 24),
-                  // Daftar topik
-                  _buildDaftarTopik(),
-                  const SizedBox(height: 24),
-                  // Section kuis
-                  _buildSectionKuis(),
+                  _buildHeaderInfo(tt),
+                  const SizedBox(height: 28),
+                  _buildDaftarTopik(tt),
+                  const SizedBox(height: 28),
+                  _buildSectionKuis(tt),
                   const SizedBox(height: 16),
-                  // Tombol AI
-                  _buildTombolAI(),
+                  _buildTombolAI(tt),
                   const SizedBox(height: 20),
                 ],
               ),
@@ -110,9 +88,7 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
     );
   }
 
-  // Header dengan judul dan deskripsi
-  Widget _buildHeaderInfo() {
-    // Deskripsi per pertemuan
+  Widget _buildHeaderInfo(TextTheme tt) {
     final deskripsiMap = {
       1: 'Memahami konsep dasar jaringan komputer, mengenal jenis-jenis jaringan berdasarkan jangkauan, serta mempelajari berbagai topologi yang digunakan.',
       2: 'Mempelajari sistem pengalamatan IP versi 4, pembagian kelas IP, perbedaan IP public dan private, serta dasar-dasar subnetting.',
@@ -136,67 +112,47 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.pertemuan['judul'],
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18, fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary)),
+        Text(widget.pertemuan['judul'], style: tt.headlineMedium),
         const SizedBox(height: 8),
-        Text(deskripsi,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13, color: AppColors.textSecondary, height: 1.5)),
-        const SizedBox(height: 12),
-        // Info ringkas
-        Row(
-          children: [
-            Icon(LucideIcons.fileText, size: 14, color: AppColors.textSecondary),
-            const SizedBox(width: 6),
-            Text('${daftarTopik.length} topik',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12, color: AppColors.textSecondary)),
-            const SizedBox(width: 16),
-            Icon(LucideIcons.clock, size: 14, color: AppColors.textSecondary),
-            const SizedBox(width: 6),
-            Text('~${daftarTopik.length * 10} menit',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12, color: AppColors.textSecondary)),
-            const SizedBox(width: 16),
-            Icon(LucideIcons.circleCheck, size: 14, color: AppColors.primary),
-            const SizedBox(width: 6),
-            Text('${daftarTopik.where((t) => t['selesai'] == true).length}/${daftarTopik.length} selesai',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w500)),
-          ],
-        ),
+        Text(deskripsi, style: tt.bodyMedium?.copyWith(height: 1.5)),
         const SizedBox(height: 16),
-        // Capaian pembelajaran
+        Row(children: [
+          _infoChip(LucideIcons.fileText, '${daftarTopik.length} topik'),
+          const SizedBox(width: 12),
+          _infoChip(LucideIcons.clock, '~${daftarTopik.length * 10} mnt'),
+          const SizedBox(width: 12),
+          _infoChip(LucideIcons.circleCheck,
+            '${daftarTopik.where((t) => t['selesai'] == true).length}/${daftarTopik.length}',
+            highlight: true),
+        ]),
+        const SizedBox(height: 20),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Capaian Pembelajaran',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13, fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
+              Text('Capaian Pembelajaran', style: tt.labelLarge),
+              const SizedBox(height: 10),
               ...capaian.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('•  ', style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12, color: AppColors.primary)),
-                    Expanded(
-                      child: Text(item,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12, color: AppColors.textSecondary, height: 1.4)),
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      width: 6, height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary, shape: BoxShape.circle),
                     ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(item,
+                      style: tt.bodyMedium?.copyWith(height: 1.4))),
                   ],
                 ),
               )),
@@ -207,15 +163,30 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
     );
   }
 
-  // Daftar topik
-  Widget _buildDaftarTopik() {
+  Widget _infoChip(IconData icon, String text, {bool highlight = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: highlight ? AppColors.accent : AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 13,
+          color: highlight ? AppColors.primary : AppColors.textSecondary),
+        const SizedBox(width: 5),
+        Text(text, style: TextStyle(
+          fontSize: 12, fontWeight: FontWeight.w500,
+          color: highlight ? AppColors.primary : AppColors.textSecondary)),
+      ]),
+    );
+  }
+
+  Widget _buildDaftarTopik(TextTheme tt) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Topik Pembelajaran',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 15, fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary)),
+        Text('Topik Pembelajaran', style: tt.titleMedium),
         const SizedBox(height: 12),
         ...daftarTopik.asMap().entries.map((entry) {
           final index = entry.key;
@@ -226,44 +197,31 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
             onTap: () => _bukaMaterTopik(index, topik),
             child: Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.border),
               ),
-              child: Row(
-                children: [
-                  // Status icon
-                  Container(
-                    width: 28, height: 28,
-                    decoration: BoxDecoration(
-                      color: selesai
-                          ? AppColors.primary.withValues(alpha: 0.1)
-                          : AppColors.bgLight,
-                      borderRadius: BorderRadius.circular(8),
-                      border: selesai ? null : Border.all(color: AppColors.border),
-                    ),
-                    child: Center(
-                      child: selesai
-                          ? Icon(LucideIcons.check, size: 14, color: AppColors.primary)
-                          : Text('${topik['nomor']}',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12, color: AppColors.textSecondary)),
-                    ),
+              child: Row(children: [
+                Container(
+                  width: 32, height: 32,
+                  decoration: BoxDecoration(
+                    color: selesai ? AppColors.accent : AppColors.background,
+                    borderRadius: BorderRadius.circular(16),
+                    border: selesai ? null : Border.all(color: AppColors.border),
                   ),
-                  const SizedBox(width: 12),
-                  // Judul topik
-                  Expanded(
-                    child: Text(topik['judul'],
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13, fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary)),
+                  child: Center(
+                    child: selesai
+                        ? const Icon(LucideIcons.check, size: 15, color: AppColors.primary)
+                        : Text('${topik['nomor']}',
+                            style: tt.labelSmall?.copyWith(fontWeight: FontWeight.w700)),
                   ),
-                  // Arrow
-                  Icon(LucideIcons.chevronRight, size: 16, color: AppColors.textSecondary),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Text(topik['judul'], style: tt.bodyLarge?.copyWith(fontSize: 14))),
+                const Icon(LucideIcons.chevronRight, size: 16, color: AppColors.textSecondary),
+              ]),
             ),
           );
         }),
@@ -271,44 +229,35 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
     );
   }
 
-  // Section kuis
-  Widget _buildSectionKuis() {
+  Widget _buildSectionKuis(TextTheme tt) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(LucideIcons.clipboardList, size: 18,
-                color: semuaTopikSelesai ? AppColors.primary : AppColors.textSecondary),
-              const SizedBox(width: 10),
-              Text('Kuis Pertemuan ${widget.pertemuan['nomor']}',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14, fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Detail kuis
-          Row(
-            children: [
-              _kuisInfo(LucideIcons.circleHelp, '5 soal'),
-              const SizedBox(width: 16),
-              _kuisInfo(LucideIcons.clock, '10 menit'),
-              const SizedBox(width: 16),
-              _kuisInfo(LucideIcons.target, 'Min. 75'),
-            ],
-          ),
+          Row(children: [
+            Icon(LucideIcons.clipboardList, size: 18,
+              color: semuaTopikSelesai ? AppColors.primary : AppColors.textSecondary),
+            const SizedBox(width: 10),
+            Text('Kuis Pertemuan ${widget.pertemuan['nomor']}', style: tt.bodyLarge),
+          ]),
           const SizedBox(height: 12),
-          // Tombol mulai
+          Row(children: [
+            _kuisInfo(LucideIcons.circleHelp, '5 soal'),
+            const SizedBox(width: 16),
+            _kuisInfo(LucideIcons.clock, '10 menit'),
+            const SizedBox(width: 16),
+            _kuisInfo(LucideIcons.target, 'Min. 75'),
+          ]),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
+            height: 50,
             child: ElevatedButton(
               onPressed: semuaTopikSelesai ? () {
                 Navigator.push(context, MaterialPageRoute(
@@ -317,15 +266,14 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
               } : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: semuaTopikSelesai ? AppColors.primary : AppColors.border,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                elevation: 0,
+                disabledBackgroundColor: AppColors.border,
               ),
               child: Text(
                 semuaTopikSelesai ? 'Mulai Kuis' : 'Selesaikan semua topik dulu',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13, fontWeight: FontWeight.w600,
-                  color: semuaTopikSelesai ? Colors.white : AppColors.textSecondary)),
+                style: TextStyle(
+                  fontSize: 14, fontWeight: FontWeight.w700,
+                  color: semuaTopikSelesai ? Colors.white : AppColors.textSecondary),
+              ),
             ),
           ),
         ],
@@ -334,46 +282,37 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
   }
 
   Widget _kuisInfo(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 13, color: AppColors.textSecondary),
-        const SizedBox(width: 4),
-        Text(text, style: GoogleFonts.plusJakartaSans(
-          fontSize: 12, color: AppColors.textSecondary)),
-      ],
-    );
+    return Row(children: [
+      Icon(icon, size: 13, color: AppColors.textSecondary),
+      const SizedBox(width: 4),
+      Text(text, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+    ]);
   }
 
-  // Tombol tanya AI
-  Widget _buildTombolAI() {
+  Widget _buildTombolAI(TextTheme tt) {
     return GestureDetector(
-      onTap: () {
-        // Nanti navigasi ke chat AI dengan konteks pertemuan ini
-      },
+      onTap: () {},
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.accent,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.bot, size: 18, color: AppColors.primary),
+            const Icon(LucideIcons.bot, size: 18, color: AppColors.primary),
             const SizedBox(width: 8),
             Text('Tanya AI tentang materi ini',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13, fontWeight: FontWeight.w500,
-                color: AppColors.primary)),
+              style: tt.labelLarge?.copyWith(color: AppColors.primary)),
           ],
         ),
       ),
     );
   }
 
-  // Buka halaman baca materi topik
   void _bukaMaterTopik(int index, Map<String, dynamic> topik) {
     Navigator.push(context, MaterialPageRoute(
       builder: (context) => _TopikReadView(
@@ -389,7 +328,6 @@ class _PertemuanDetailViewState extends State<PertemuanDetailView> {
   }
 }
 
-// ===== HALAMAN BACA MATERI TOPIK =====
 class _TopikReadView extends StatelessWidget {
   final String judul;
   final int nomorPertemuan;
@@ -405,44 +343,29 @@ class _TopikReadView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(judul,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 15, fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary),
-          maxLines: 1, overflow: TextOverflow.ellipsis),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
-        ),
+        title: Text(judul, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
       body: Column(
         children: [
-          // Konten materi
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(judul,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18, fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary)),
+                  Text(judul, style: tt.headlineMedium),
                   const SizedBox(height: 6),
-                  Text('Pertemuan $nomorPertemuan',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12, color: AppColors.textSecondary)),
-                  const SizedBox(height: 20),
-                  // Isi materi (dummy text)
+                  Text('Pertemuan $nomorPertemuan', style: tt.labelSmall),
+                  const SizedBox(height: 24),
                   Text(
                     'Materi ini membahas tentang $judul secara lengkap. '
                     'Dalam praktikum jaringan komputer, pemahaman tentang topik ini '
@@ -455,37 +378,32 @@ class _TopikReadView extends StatelessWidget {
                     'Pastikan kamu memahami semua poin di atas sebelum '
                     'melanjutkan ke topik berikutnya. Jika ada yang belum '
                     'dipahami, gunakan fitur AI Tutor untuk bertanya.',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14, color: AppColors.textPrimary, height: 1.7),
+                    style: tt.bodyLarge?.copyWith(height: 1.7),
                   ),
                 ],
               ),
             ),
           ),
-
-          // Tombol bawah
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
               border: Border(top: BorderSide(color: AppColors.border)),
             ),
             child: SafeArea(
               child: SizedBox(
                 width: double.infinity,
+                height: 52,
                 child: ElevatedButton(
                   onPressed: sudahSelesai ? null : onSelesai,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: sudahSelesai ? AppColors.border : AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
+                    disabledBackgroundColor: AppColors.border,
                   ),
                   child: Text(
-                    sudahSelesai ? 'Sudah selesai ✓' : 'Tandai selesai',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14, fontWeight: FontWeight.w600,
+                    sudahSelesai ? 'Sudah selesai' : 'Tandai selesai',
+                    style: TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700,
                       color: sudahSelesai ? AppColors.textSecondary : Colors.white),
                   ),
                 ),

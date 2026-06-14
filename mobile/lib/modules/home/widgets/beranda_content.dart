@@ -1,390 +1,386 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/constants/dummy_data.dart';
 import '../home_controller.dart';
 
-// Konten Beranda — clean, satu warna utama (biru)
 class BerandaContent extends StatelessWidget {
   const BerandaContent({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: AppColors.bgLight,
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 100),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              _buildHeader(),
-              const SizedBox(height: 20),
-              _buildBannerAI(),
-              const SizedBox(height: 20),
-              _buildSectionProgress(),
-              const SizedBox(height: 24),
-              _buildSectionPertemuan(),
-              const SizedBox(height: 24),
-              _buildAktivitasTerakhir(),
-              const SizedBox(height: 24),
-              _buildKuisTersedia(),
-            ],
-          ),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _buildHeader(tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverToBoxAdapter(child: _buildStatRow(tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverToBoxAdapter(child: _buildBannerAI(tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            SliverToBoxAdapter(child: _buildSectionTitle('Pertemuan', tt, onTap: () {
+              Get.find<HomeController>().keMateri();
+            })),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            SliverToBoxAdapter(child: _buildPertemuanScroll(tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            SliverToBoxAdapter(child: _buildSectionTitle('Aktivitas Terakhir', tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            SliverToBoxAdapter(child: _buildAktivitas(tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            SliverToBoxAdapter(child: _buildSectionTitle('Kuis Tersedia', tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            SliverToBoxAdapter(child: _buildKuis(tt)),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
         ),
       ),
     );
   }
 
-  // Header
-  Widget _buildHeader() {
+  Widget _buildHeader(TextTheme tt) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Container(
-            width: 38, height: 38,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text('I',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15, fontWeight: FontWeight.bold,
-                  color: AppColors.primary)),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+      child: Row(children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Center(
+            child: Text(
+              DummyData.nama.substring(0, 1),
+              style: const TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Hi, ${DummyData.nama}',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13, color: AppColors.textSecondary)),
-                Text('Mau belajar apa?',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18, fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary)),
-              ],
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Halo, ${DummyData.nama.split(' ').first}',
+              style: tt.titleMedium),
+            const SizedBox(height: 2),
+            Text('Kelas ${DummyData.kelas}',
+              style: tt.labelSmall),
+          ],
+        )),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
           ),
-          Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: const Icon(LucideIcons.bell,
-                size: 17, color: AppColors.textPrimary),
-          ),
-        ],
+          child: const Icon(LucideIcons.bell,
+            size: 18, color: AppColors.textSecondary),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildStatRow(TextTheme tt) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(children: [
+        _statCard(
+          '${DummyData.pertemuanSelesai}/${DummyData.totalPertemuan}',
+          'Pertemuan',
+          LucideIcons.bookOpen,
+          tt,
+        ),
+        const SizedBox(width: 12),
+        _statCard(
+          '${DummyData.nilaiRataRata}',
+          'Nilai',
+          LucideIcons.star,
+          tt,
+        ),
+        const SizedBox(width: 12),
+        _statCard(
+          '${DummyData.totalChat}',
+          'Chat AI',
+          LucideIcons.messageCircle,
+          tt,
+        ),
+      ]),
+    );
+  }
+
+  Widget _statCard(String angka, String label, IconData icon, TextTheme tt) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, size: 16, color: AppColors.textSecondary),
+          const SizedBox(height: 10),
+          Text(angka, style: tt.headlineMedium),
+          const SizedBox(height: 2),
+          Text(label, style: tt.labelSmall),
+        ]),
       ),
     );
   }
 
-  // Banner AI
-  Widget _buildBannerAI() {
+  Widget _buildBannerAI(TextTheme tt) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: GestureDetector(
         onTap: () => Get.find<HomeController>().keChat(),
         child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(children: [
             Container(
-              width: 36, height: 36,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10)),
-              child: const Icon(LucideIcons.bot,
-                  color: AppColors.primary, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('AI Tutor',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15, fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary)),
-                  Text('Tanya materi yang belum paham',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12, color: AppColors.textSecondary)),
-                ],
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: const Icon(LucideIcons.bot,
+                color: Colors.white, size: 22),
             ),
-            const Icon(LucideIcons.arrowRight,
-                size: 18, color: AppColors.primary),
-          ],
-        ),
-      ),
-      ),
-    );
-  }
-
-  // Progress — 3 card putih simple
-  Widget _buildSectionProgress() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          _progressItem(LucideIcons.bookOpen, '${DummyData.pertemuanSelesai}/${DummyData.totalPertemuan}', 'pertemuan'),
-          const SizedBox(width: 10),
-          _progressItem(LucideIcons.star, '${DummyData.nilaiRataRata}', 'nilai'),
-          const SizedBox(width: 10),
-          _progressItem(LucideIcons.flame, '${DummyData.streakHari} hari', 'streak'),
-        ],
-      ),
-    );
-  }
-
-  Widget _progressItem(IconData icon, String angka, String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 15, color: AppColors.primary),
-            const SizedBox(width: 8),
-            Column(
+            const SizedBox(width: 14),
+            Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(angka,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14, fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary)),
-                Text(label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10, color: AppColors.textSecondary)),
+                Text('AI Tutor',
+                  style: tt.titleMedium?.copyWith(color: Colors.white)),
+                const SizedBox(height: 4),
+                Text('Tanya apapun soal materi',
+                  style: tt.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.6))),
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Pertemuan — horizontal scroll
-  Widget _buildSectionPertemuan() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Pertemuan',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18, fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary)),
-              GestureDetector(
-                onTap: () => Get.find<HomeController>().keMateri(),
-                child: Text('Lihat semua',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13, color: AppColors.primary)),
+            )),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
-            ],
-          ),
+              child: Text('Tanya',
+                style: tt.labelLarge?.copyWith(color: AppColors.primaryDark)),
+            ),
+          ]),
         ),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 150,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              _pertemuanCard(1, 'Pengenalan\nJaringan', '4 topik', 0.75),
-              _pertemuanCard(2, 'Pengalamatan\nIP', '4 topik', 0.5),
-              _pertemuanCard(3, 'Konfigurasi\nIP Windows', '3 topik', 0.33),
-              _pertemuanCard(4, 'Implementasi\nVLAN', '4 topik', 0.0),
-              _pertemuanCard(5, 'Static\nRouting', '3 topik', 0.0),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _pertemuanCard(int nomor, String judul, String topik, double progress) {
+  Widget _buildSectionTitle(String text, TextTheme tt, {VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(children: [
+        Text(text, style: tt.titleMedium),
+        const Spacer(),
+        if (onTap != null)
+          GestureDetector(
+            onTap: onTap,
+            child: Text('Semua',
+              style: tt.labelLarge?.copyWith(color: AppColors.primary)),
+          ),
+      ]),
+    );
+  }
+
+  Widget _buildPertemuanScroll(TextTheme tt) {
+    final data = [
+      (1, 'Pengenalan\nJaringan', 4, 0.75),
+      (2, 'Pengalamatan\nIP', 4, 0.5),
+      (3, 'Konfigurasi\nWindows', 3, 0.33),
+      (4, 'Implementasi\nVLAN', 4, 0.0),
+      (5, 'Static\nRouting', 3, 0.0),
+    ];
+
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        itemCount: data.length,
+        itemBuilder: (_, i) {
+          final (nomor, judul, topik, progress) = data[i];
+          final color = AppColors.pertemuanColors[
+              i % AppColors.pertemuanColors.length];
+          return _pertemuanCard(nomor, judul, topik, progress, color, tt);
+        },
+      ),
+    );
+  }
+
+  Widget _pertemuanCard(int nomor, String judul, int topik,
+      double progress, Color accentColor, TextTheme tt) {
+    final locked = progress == 0.0 && nomor > 3;
+
     return Container(
-      width: 145,
+      width: 140,
       margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Nomor
-          Text('$nomor',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13, fontWeight: FontWeight.bold,
-              color: AppColors.primary)),
-          const SizedBox(height: 10),
-          // Judul
-          Text(judul,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13, fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary, height: 1.3)),
-          const Spacer(),
-          // Info
-          Text(topik,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11, color: AppColors.textSecondary)),
-          const SizedBox(height: 8),
-          // Progress bar — semua biru
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.border,
-              color: AppColors.primary,
-              minHeight: 4,
+      child: Stack(children: [
+        Positioned(top: 0, left: 0, right: 0,
+          child: Container(
+            height: 4,
+            decoration: BoxDecoration(
+              color: locked ? AppColors.border : accentColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 18, 14, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('P-$nomor',
+                style: tt.labelSmall?.copyWith(
+                  color: locked ? AppColors.textSecondary : AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                )),
+              const SizedBox(height: 6),
+              Text(judul,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                  color: locked ? AppColors.textSecondary : AppColors.textPrimary,
+                )),
+              const Spacer(),
+              Row(children: [
+                Icon(
+                  locked ? LucideIcons.lock : LucideIcons.layoutList,
+                  size: 11, color: AppColors.textSecondary),
+                const SizedBox(width: 4),
+                Text(locked ? 'Terkunci' : '$topik topik',
+                  style: tt.labelSmall),
+              ]),
+              if (!locked && progress > 0) ...[
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: AppColors.border,
+                    valueColor: AlwaysStoppedAnimation(accentColor),
+                    minHeight: 4,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ]),
     );
   }
 
-  // Aktivitas terakhir
-  Widget _buildAktivitasTerakhir() {
+  Widget _buildAktivitas(TextTheme tt) {
+    final items = [
+      (LucideIcons.bot, 'Tanya AI: Cara konfigurasi VLAN?', '10 mnt lalu'),
+      (LucideIcons.circleCheck, 'Selesai: Kelas IP Address', '1 jam lalu'),
+      (LucideIcons.fileQuestion, 'Kuis Pertemuan 1 — Nilai: 85', 'Kemarin'),
+    ];
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Aktivitas Terakhir',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18, fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary)),
-          const SizedBox(height: 14),
-          _aktivitasItem(LucideIcons.bot, 'Tanya AI: Cara konfigurasi VLAN?', '10 menit lalu'),
-          _aktivitasItem(LucideIcons.circleCheck, 'Topik selesai: Kelas IP Address', '1 jam lalu'),
-          _aktivitasItem(LucideIcons.fileQuestion, 'Kuis Pertemuan 1 — Nilai: 85', 'Kemarin'),
-        ],
-      ),
-    );
-  }
-
-  Widget _aktivitasItem(IconData icon, String judul, String waktu) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(children: items.map((item) {
+        final (icon, judul, waktu) = item;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(children: [
+            Icon(icon, size: 18, color: AppColors.textSecondary),
+            const SizedBox(width: 12),
+            Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(judul,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13, fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary),
+                  style: tt.bodyLarge?.copyWith(fontSize: 13),
                   maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text(waktu,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11, color: AppColors.textSecondary)),
+                Text(waktu, style: tt.labelSmall),
               ],
-            ),
-          ),
-          Icon(LucideIcons.chevronRight, size: 16, color: AppColors.border),
-        ],
-      ),
+            )),
+            const Icon(LucideIcons.chevronRight,
+              size: 14, color: AppColors.border),
+          ]),
+        );
+      }).toList()),
     );
   }
 
-  // Kuis tersedia
-  Widget _buildKuisTersedia() {
+  Widget _buildKuis(TextTheme tt) {
+    final items = [
+      ('Pertemuan 3', 'Konfigurasi IP di Windows', 5),
+      ('Pertemuan 2', 'Pengalamatan IP', 5),
+    ];
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Kuis Tersedia',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18, fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary)),
-          const SizedBox(height: 14),
-          _kuisCard('Pertemuan 3', 'Konfigurasi IP di Windows', '5 soal'),
-          _kuisCard('Pertemuan 2', 'Pengalamatan IP', '5 soal'),
-        ],
-      ),
-    );
-  }
-
-  Widget _kuisCard(String pertemuan, String judul, String soal) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(children: items.map((item) {
+        final (pertemuan, judul, soal) = item;
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(children: [
+            Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(pertemuan,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11, color: AppColors.primary,
-                    fontWeight: FontWeight.w600)),
+                  style: tt.labelSmall?.copyWith(
+                    color: AppColors.primary, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                Text(judul,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14, fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary)),
+                Text(judul, style: tt.bodyLarge?.copyWith(fontSize: 14)),
                 const SizedBox(height: 4),
-                Text(soal,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12, color: AppColors.textSecondary)),
+                Text('$soal soal · ~5 menit', style: tt.labelSmall),
               ],
+            )),
+            const SizedBox(width: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text('Mulai',
+                style: tt.labelLarge?.copyWith(color: Colors.white)),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(8)),
-            child: Text('Mulai',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
-          ),
-        ],
-      ),
+          ]),
+        );
+      }).toList()),
     );
   }
 }

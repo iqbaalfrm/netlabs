@@ -11,10 +11,14 @@ backend/**/*.pyc
 backend/.env
 backend/chroma_db/
 
-# ── WEB ADMIN ──
-web-admin/node_modules/
-web-admin/dist/
-web-admin/.env
+# ── WEB LARAVEL ──
+web-laravel/.env
+web-laravel/vendor/
+web-laravel/storage/framework/cache/
+web-laravel/storage/framework/sessions/
+web-laravel/storage/framework/views/
+web-laravel/storage/logs/
+web-laravel/bootstrap/cache/
 
 # ── MOBILE ──
 mobile/.dart_tool/

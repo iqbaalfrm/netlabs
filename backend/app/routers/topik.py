@@ -1,22 +1,41 @@
-# Router topik — CRUD topik + tandai sudah dibaca
+# Router topik — CRUD topik + tandai sudah dibaca + pagination
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
 from app.database import db
 from app.middleware.auth import get_current_user, guru_only, siswa_only
 from app.schemas import TopikCreate, TopikUpdate
+from app.helpers.pagination import paginate_params, paginate_response
 
 router = APIRouter()
 
 
 @router.get("/{pertemuan_id}")
-async def ambil_topik(pertemuan_id: str, user: dict = Depends(get_current_user)):
-    """Ambil daftar topik + status baca siswa"""
-    result = db.table("topik").select("*").eq(
-        "pertemuan_id", pertemuan_id).order("nomor_urut").execute()
+async def ambil_topik(
+    pertemuan_id: str,
+    page: int = 1,
+    limit: int = 10,
+    search: Optional[str] = None,
+    user: dict = Depends(get_current_user),
+):
+    """Ambil daftar topik dengan pagination + status baca siswa"""
+    page, limit = paginate_params(page, limit)
+    offset = (page - 1) * limit
+
+    count_query = db.table("topik").select("*", count="exact").eq("pertemuan_id", pertemuan_id)
+    if search:
+        count_query = count_query.ilike("judul", f"%{search}%")
+    count_result = count_query.execute()
+    total = count_result.count or 0
+
+    data_query = db.table("topik").select("*").eq("pertemuan_id", pertemuan_id)
+    if search:
+        data_query = data_query.ilike("judul", f"%{search}%")
+    data_query = data_query.order("nomor_urut").range(offset, offset + limit - 1)
+    result = data_query.execute()
 
     topik_list = result.data or []
 
-    # Jika siswa, tambahkan status sudah_dibaca
     if user.get("role") == "siswa":
         progress = db.table("progress_topik").select("topik_id").eq(
             "siswa_id", user["id"]).eq("sudah_dibaca", True).execute()
@@ -24,7 +43,16 @@ async def ambil_topik(pertemuan_id: str, user: dict = Depends(get_current_user))
         for t in topik_list:
             t["sudah_dibaca"] = t["id"] in sudah_dibaca_ids
 
-    return {"data": topik_list}
+    return paginate_response(topik_list, page, limit, total)
+
+
+@router.get("/detail/{topik_id}")
+async def ambil_detail_topik(topik_id: str, user: dict = Depends(get_current_user)):
+    """Ambil detail topik lengkap"""
+    result = db.table("topik").select("*").eq("id", topik_id).single().execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Topik tidak ditemukan")
+    return {"data": result.data, "message": "OK"}
 
 
 @router.post("/")
@@ -54,7 +82,7 @@ async def update_topik(topik_id: str, request: TopikUpdate, user: dict = Depends
 async def hapus_topik(topik_id: str, user: dict = Depends(guru_only)):
     """Hapus topik (guru only)"""
     db.table("topik").delete().eq("id", topik_id).execute()
-    return {"message": "Topik berhasil dihapus"}
+    return {"data": None, "message": "Topik berhasil dihapus"}
 
 
 @router.post("/{topik_id}/baca")
@@ -75,4 +103,4 @@ async def tandai_dibaca(topik_id: str, user: dict = Depends(siswa_only)):
             "sudah_dibaca": True, "waktu_dibaca": waktu,
         }).execute()
 
-    return {"message": "Topik ditandai sudah dibaca ✅"}
+    return {"data": None, "message": "Topik ditandai sudah dibaca"}

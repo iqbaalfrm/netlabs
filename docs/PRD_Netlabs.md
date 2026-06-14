@@ -18,7 +18,7 @@
 
 Praktikum Komputer Jaringan Dasar di SMK masih menghadapi beberapa kendala utama, di antaranya keterbatasan pendampingan guru saat kegiatan praktikum berlangsung, minimnya media belajar mandiri yang kontekstual, serta rendahnya kemandirian siswa dalam menyelesaikan permasalahan praktikum tanpa bantuan langsung dari guru.
 
-Berdasarkan observasi di SMK Bhakti Praja Dukuhwaru, siswa kelas XI TKJ sering mengalami kebingungan saat menghadapi langkah-langkah konfigurasi jaringan dan tidak memiliki akses cepat ke sumber referensi yang relevan dengan materi yang sedang dipelajari. Ketergantungan siswa terhadap guru menyebabkan proses praktikum menjadi kurang efisien.
+Berdasarkan observasi di salah satu SMK, siswa kelas XI TKJ sering mengalami kebingungan saat menghadapi langkah-langkah konfigurasi jaringan dan tidak memiliki akses cepat ke sumber referensi yang relevan dengan materi yang sedang dipelajari. Ketergantungan siswa terhadap guru menyebabkan proses praktikum menjadi kurang efisien.
 
 Perkembangan teknologi kecerdasan buatan, khususnya Retrieval-Augmented Generation (RAG), membuka peluang untuk mengembangkan sistem tutor cerdas yang mampu memberikan jawaban kontekstual berdasarkan modul dan materi resmi sekolah. Teknologi ini memungkinkan sistem untuk tidak hanya menjawab pertanyaan secara umum, tetapi secara spesifik merujuk pada konten modul praktikum yang telah diunggah oleh guru.
 

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:dio/dio.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/services/api_service.dart';
 
-// Controller untuk halaman login
 class AuthController extends GetxController {
   final nisController = TextEditingController();
   final passwordController = TextEditingController();
@@ -14,7 +12,6 @@ class AuthController extends GetxController {
 
   void togglePassword() => passwordTersembunyi.value = !passwordTersembunyi.value;
 
-  // Fungsi login — pakai API backend, fallback ke dummy jika gagal
   void login() async {
     if (nisController.text.isEmpty || passwordController.text.isEmpty) {
       Get.snackbar('Gagal', 'NIS dan Password harus diisi',
@@ -24,39 +21,27 @@ class AuthController extends GetxController {
 
     sedangLoading.value = true;
 
-    try {
-      // Coba API backend
-      final result = await ApiService.login(
-        nisController.text.trim(),
-        passwordController.text.trim(),
-      );
+    final result = await ApiService.login(
+      nisController.text.trim(),
+      passwordController.text.trim(),
+    );
 
-      // Simpan token dan data user
-      final storage = GetStorage();
-      storage.write('token', result['token']);
-      storage.write('user', result['user']);
+    sedangLoading.value = false;
 
-      sedangLoading.value = false;
+    if (result['success'] == true) {
       Get.offAllNamed(Routes.home);
-    } on DioException catch (e) {
-      sedangLoading.value = false;
+    } else {
+      final message = result['message'] ?? 'Login gagal';
 
-      // Jika server tidak bisa dijangkau, pakai login dummy
-      final isOffline = e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.unknown;
-
-      if (isOffline) {
+      if (message.contains('Tidak bisa terhubung') || message.contains('timeout')) {
         _loginDummy();
       } else {
-        final pesan = e.response?.data?['detail'] ?? 'Login gagal';
-        Get.snackbar('Login Gagal', pesan,
+        Get.snackbar('Login Gagal', message,
             backgroundColor: Colors.red.shade100, colorText: Colors.red.shade800);
       }
     }
   }
 
-  // Login dummy saat backend tidak tersedia (untuk demo)
   void _loginDummy() {
     final storage = GetStorage();
     storage.write('token', 'demo-token');

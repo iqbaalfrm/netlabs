@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.database import db
-from app.middleware.auth import guru_only, siswa_only
+from app.middleware.auth import guru_only, siswa_only, get_current_user
+from app.helpers.pagination import paginate_params, paginate_response
 
 router = APIRouter()
 
@@ -34,14 +35,26 @@ class SubmitKuisRequest(BaseModel):
 @router.get("/soal")
 async def daftar_soal(
     pertemuan_id: Optional[str] = None,
+    page: int = 1,
+    limit: int = 10,
     user: dict = Depends(guru_only),
 ):
-    """Ambil bank soal untuk guru."""
-    query = db.table("soal_kuis").select("*")
+    """Ambil bank soal untuk guru dengan pagination."""
+    page, limit = paginate_params(page, limit)
+    offset = (page - 1) * limit
+
+    count_query = db.table("soal_kuis").select("*", count="exact")
     if pertemuan_id:
-        query = query.eq("pertemuan_id", pertemuan_id)
-    result = query.execute()
-    return {"data": result.data or []}
+        count_query = count_query.eq("pertemuan_id", pertemuan_id)
+    count_result = count_query.execute()
+    total = count_result.count or 0
+
+    data_query = db.table("soal_kuis").select("*")
+    if pertemuan_id:
+        data_query = data_query.eq("pertemuan_id", pertemuan_id)
+    result = data_query.order("created_at").range(offset, offset + limit - 1).execute()
+
+    return paginate_response(result.data or [], page, limit, total)
 
 
 @router.post("/soal")
@@ -57,7 +70,47 @@ async def buat_soal(request: SoalCreate, user: dict = Depends(guru_only)):
 async def hapus_soal(soal_id: str, user: dict = Depends(guru_only)):
     """Hapus soal kuis."""
     db.table("soal_kuis").delete().eq("id", soal_id).execute()
-    return {"message": "Soal kuis berhasil dihapus"}
+    return {"data": None, "message": "Soal kuis berhasil dihapus"}
+
+
+@router.get("/{pertemuan_id}")
+async def ambil_kuis(pertemuan_id: str, user: dict = Depends(siswa_only)):
+    """Ambil soal kuis untuk siswa (maks 5 soal)."""
+    result = (
+        db.table("soal_kuis")
+        .select("id,pertemuan_id,pertanyaan,pilihan_a,pilihan_b,pilihan_c,pilihan_d")
+        .eq("pertemuan_id", pertemuan_id)
+        .limit(5)
+        .execute()
+    )
+    return {"data": result.data or [], "message": "OK"}
+
+
+@router.get("/{pertemuan_id}/hasil")
+async def cek_hasil_kuis(pertemuan_id: str, user: dict = Depends(siswa_only)):
+    """Cek apakah siswa sudah mengerjakan kuis ini."""
+    result = (
+        db.table("hasil_kuis")
+        .select("*")
+        .eq("siswa_id", user["id"])
+        .eq("pertemuan_id", pertemuan_id)
+        .order("waktu_kuis", desc=True)
+        .limit(1)
+        .execute()
+    )
+
+    if result.data:
+        return {
+            "data": result.data[0],
+            "sudah_dikerjakan": True,
+            "message": "Kuis sudah pernah dikerjakan",
+        }
+
+    return {
+        "data": None,
+        "sudah_dikerjakan": False,
+        "message": "Kuis belum dikerjakan",
+    }
 
 
 @router.post("/submit")
@@ -65,6 +118,17 @@ async def submit_kuis(request: SubmitKuisRequest, user: dict = Depends(siswa_onl
     """Submit jawaban kuis dan simpan nilai siswa."""
     if not request.jawaban:
         raise HTTPException(status_code=422, detail="Jawaban kuis tidak boleh kosong")
+
+    # Check if already submitted
+    existing = (
+        db.table("hasil_kuis")
+        .select("id")
+        .eq("siswa_id", user["id"])
+        .eq("pertemuan_id", request.pertemuan_id)
+        .execute()
+    )
+    if existing.data:
+        raise HTTPException(status_code=409, detail="Kuis ini sudah pernah dikerjakan")
 
     soal_ids = [item.soal_id for item in request.jawaban]
     soal_result = (
@@ -95,22 +159,10 @@ async def submit_kuis(request: SubmitKuisRequest, user: dict = Depends(siswa_onl
     }).execute()
 
     return {
-        "data": insert_result.data,
-        "jumlah_benar": jumlah_benar,
-        "total_soal": total_soal,
-        "nilai": nilai,
+        "data": {
+            "jumlah_benar": jumlah_benar,
+            "total_soal": total_soal,
+            "nilai": nilai,
+        },
         "message": "Kuis berhasil disubmit",
     }
-
-
-@router.get("/{pertemuan_id}")
-async def ambil_kuis(pertemuan_id: str, user: dict = Depends(siswa_only)):
-    """Ambil maksimal 5 soal kuis untuk siswa."""
-    result = (
-        db.table("soal_kuis")
-        .select("id,pertemuan_id,pertanyaan,pilihan_a,pilihan_b,pilihan_c,pilihan_d")
-        .eq("pertemuan_id", pertemuan_id)
-        .limit(5)
-        .execute()
-    )
-    return {"data": result.data or []}

@@ -111,13 +111,13 @@ CREATE TABLE IF NOT EXISTS badge (
 -- ============================================================
 
 INSERT INTO users (nis, nama, role, sekolah, password_hash) VALUES
-  ('GURU001', 'Pak Ahmad', 'guru', 'SMK Bhakti Praja Dukuhwaru',
+  ('GURU001', 'Pak Ahmad', 'guru', 'SMK',
    '$2b$12$LUxIszyML3aFqv.QLPQEnun.lppuE6VjettMw.Cwax1axMZdxhfB2')
 ON CONFLICT (nis) DO NOTHING;
 
 INSERT INTO users (nis, nama, role, kelas, sekolah, password_hash) VALUES
   ('2122100045', 'Muhammad Iqbal', 'siswa', 'XI TKJ 2',
-   'SMK Bhakti Praja Dukuhwaru',
+   'SMK',
    '$2b$12$TfD80QX0bS.fuVJL6Ns.A.ggvMPQxpPkTzK6ZjZXYprZpt1HDBhhm')
 ON CONFLICT (nis) DO NOTHING;
 

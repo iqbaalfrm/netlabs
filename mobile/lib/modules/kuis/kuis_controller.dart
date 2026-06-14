@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart';
 import '../../app/services/api_service.dart';
 import 'hasil_kuis_view.dart';
 
-// Controller untuk halaman kuis
 class KuisController extends GetxController {
   late int nomorPertemuan;
   late String pertemuanId;
@@ -12,7 +10,8 @@ class KuisController extends GetxController {
   var soalSekarang = 0.obs;
   var jawabanDipilih = (-1).obs;
   final List<int> jawabanSiswa = [];
-  late List<Map<String, dynamic>> daftarSoal;
+
+  final RxList<Map<String, dynamic>> daftarSoal = <Map<String, dynamic>>[].obs;
 
   var sedangMemuat = true.obs;
 
@@ -22,26 +21,31 @@ class KuisController extends GetxController {
     _muatSoal();
   }
 
-  // Ambil soal dari backend, fallback ke dummy
   Future<void> _muatSoal() async {
     sedangMemuat.value = true;
-    try {
-      final data = await ApiService.getSoalKuis(pertemuanId);
-      if (data.isNotEmpty) {
-        daftarSoal = data.cast<Map<String, dynamic>>();
-      } else {
-        daftarSoal = _getSoalDummy(nomorPertemuan);
-      }
-    } on DioException {
-      daftarSoal = _getSoalDummy(nomorPertemuan);
-    } finally {
+
+    // Check if already submitted
+    final hasilCek = await ApiService.cekHasilKuis(pertemuanId);
+    if (hasilCek['sudah_dikerjakan'] == true) {
       sedangMemuat.value = false;
+      final data = hasilCek['data'];
+      if (data != null) {
+        Get.snackbar('Info', 'Kuis ini sudah pernah dikerjakan',
+            backgroundColor: Colors.blue.shade100, colorText: Colors.blue.shade800);
+      }
     }
+
+    final data = await ApiService.getSoalKuis(pertemuanId);
+    if (data.isNotEmpty) {
+      daftarSoal.assignAll(data.cast<Map<String, dynamic>>());
+    } else {
+      daftarSoal.assignAll(_getSoalDummy(nomorPertemuan));
+    }
+    sedangMemuat.value = false;
   }
 
   void pilihJawaban(int index) => jawabanDipilih.value = index;
 
-  // Lanjut soal atau selesai dan submit ke backend
   void lanjut(BuildContext context) async {
     final huruf = ['a', 'b', 'c', 'd'];
     jawabanSiswa.add(jawabanDipilih.value);
@@ -50,7 +54,6 @@ class KuisController extends GetxController {
       soalSekarang.value++;
       jawabanDipilih.value = -1;
     } else {
-      // Hitung lokal dulu
       int benarLokal = 0;
       final List<Map<String, String>> jawabanKirim = [];
       for (int i = 0; i < daftarSoal.length; i++) {
@@ -59,15 +62,15 @@ class KuisController extends GetxController {
         final jawabanHuruf = indexPilih >= 0 ? huruf[indexPilih] : 'a';
         jawabanKirim.add({'soal_id': soal['id']?.toString() ?? '', 'jawaban': jawabanHuruf});
 
-        // Untuk soal dummy (tidak ada jawaban_benar), gunakan perhitungan lokal
         final jwbBenar = soal['jawaban'] as int? ?? 0;
         if (indexPilih == jwbBenar) benarLokal++;
       }
 
-      try {
-        // Coba submit ke backend
-        final hasil = await ApiService.submitKuis(pertemuanId, jawabanKirim);
-        if (!context.mounted) return;
+      final hasil = await ApiService.submitKuis(pertemuanId, jawabanKirim);
+
+      if (!context.mounted) return;
+
+      if (hasil['success'] == true) {
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (_) => HasilKuisView(
             jumlahBenar: (hasil['jumlah_benar'] as num).toInt(),
@@ -75,9 +78,13 @@ class KuisController extends GetxController {
             nomorPertemuan: nomorPertemuan,
           ),
         ));
-      } on DioException {
-        // Fallback: pakai hasil lokal
-        if (!context.mounted) return;
+      } else {
+        // Fallback or already submitted
+        final msg = hasil['message'] ?? '';
+        if (msg.contains('sudah pernah')) {
+          Get.snackbar('Info', msg,
+              backgroundColor: Colors.orange.shade100, colorText: Colors.orange.shade800);
+        }
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (_) => HasilKuisView(
             jumlahBenar: benarLokal,
@@ -89,9 +96,13 @@ class KuisController extends GetxController {
     }
   }
 
-  Map<String, dynamic> get soalAktif => daftarSoal[soalSekarang.value];
+  Map<String, dynamic> get soalAktif {
+    if (daftarSoal.isEmpty || soalSekarang.value >= daftarSoal.length) {
+      return {};
+    }
+    return daftarSoal[soalSekarang.value];
+  }
 
-  // Soal dummy saat backend tidak tersedia
   List<Map<String, dynamic>> _getSoalDummy(int nomor) {
     final soalMap = {
       1: [

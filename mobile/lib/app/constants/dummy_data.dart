@@ -4,13 +4,13 @@ class DummyData {
   static const String nama = 'Muhammad Iqbal';
   static const String nis = '2122100045';
   static const String kelas = 'XI TKJ 2';
-  static const String sekolah = 'SMK Bhakti Praja Dukuhwaru';
+  static const String sekolah = 'SMK';
 
   // Statistik
   static const int pertemuanSelesai = 3;
   static const int totalPertemuan = 5;
   static const int nilaiRataRata = 82;
-  static const int streakHari = 7;
+  static const int totalChat = 24;
 
   // Balasan AI dummy berdasarkan kata kunci (IT Networking)
   static String getBalasanAI(String pertanyaan) {
