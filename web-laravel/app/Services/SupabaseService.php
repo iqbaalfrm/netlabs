@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Service untuk komunikasi dengan Supabase REST API
@@ -73,19 +74,21 @@ class SupabaseService
      */
     public function getPertemuan(): array
     {
-        $response = Http::withHeaders([
-            'apikey' => $this->serviceKey,
-            'Authorization' => 'Bearer ' . $this->serviceKey,
-        ])->get($this->url . '/rest/v1/pertemuan', [
-            'select' => '*',
-            'order'  => 'nomor_urut.asc',
-        ]);
+        return Cache::remember('supabase_pertemuan', 600, function () {
+            $response = Http::withHeaders([
+                'apikey' => $this->serviceKey,
+                'Authorization' => 'Bearer ' . $this->serviceKey,
+            ])->get($this->url . '/rest/v1/pertemuan', [
+                'select' => '*',
+                'order'  => 'nomor_urut.asc',
+            ]);
 
-        if (!$response->successful()) {
-            return [];
-        }
+            if (!$response->successful()) {
+                return [];
+            }
 
-        return $response->json();
+            return $response->json();
+        });
     }
 
     /**
@@ -122,6 +125,7 @@ class SupabaseService
             return ['success' => false, 'message' => 'Gagal membuat pertemuan'];
         }
 
+        Cache::forget('supabase_pertemuan');
         return ['success' => true, 'data' => $response->json()];
     }
 
@@ -140,6 +144,7 @@ class SupabaseService
             return ['success' => false, 'message' => 'Gagal update pertemuan'];
         }
 
+        Cache::forget('supabase_pertemuan');
         return ['success' => true];
     }
 
@@ -157,6 +162,7 @@ class SupabaseService
             return ['success' => false, 'message' => 'Gagal hapus pertemuan'];
         }
 
+        Cache::forget('supabase_pertemuan');
         return ['success' => true];
     }
 
@@ -227,20 +233,22 @@ class SupabaseService
     }
 
     /**
-     * Ambil semua siswa
+     * Ambil semua data siswa
      */
     public function getSiswa(): array
     {
-        $response = Http::withHeaders([
-            'apikey'       => $this->serviceKey,
-            'Authorization' => 'Bearer ' . $this->serviceKey,
-        ])->get($this->url . '/rest/v1/users', [
-            'role'   => 'eq.siswa',
-            'select' => 'id,nis,nama,kelas,sekolah,streak_hari,total_chat,created_at',
-            'order'  => 'nama.asc',
-        ]);
+        return Cache::remember('supabase_siswa', 600, function () {
+            $response = Http::withHeaders([
+                'apikey'       => $this->serviceKey,
+                'Authorization' => 'Bearer ' . $this->serviceKey,
+            ])->get($this->url . '/rest/v1/users', [
+                'role'   => 'eq.siswa',
+                'select' => 'id,nis,nama,kelas,sekolah,streak_hari,total_chat,created_at',
+                'order'  => 'nama.asc',
+            ]);
 
-        return $response->successful() ? $response->json() : [];
+            return $response->successful() ? $response->json() : [];
+        });
     }
 
     /**
@@ -266,18 +274,20 @@ class SupabaseService
     /**
      * Ambil hasil kuis semua siswa (rekap)
      */
-    public function getRekap(): array
-    {
-        $response = Http::withHeaders([
-            'apikey'       => $this->serviceKey,
-            'Authorization' => 'Bearer ' . $this->serviceKey,
-        ])->get($this->url . '/rest/v1/hasil_kuis', [
-            'select' => '*',
-            'order'  => 'waktu_kuis.desc',
-        ]);
-
-        return $response->successful() ? $response->json() : [];
-    }
+     public function getRekap(): array
+     {
+         return Cache::remember('supabase_rekap', 600, function () {
+             $response = Http::withHeaders([
+                 'apikey'       => $this->serviceKey,
+                 'Authorization' => 'Bearer ' . $this->serviceKey,
+             ])->get($this->url . '/rest/v1/hasil_kuis', [
+                 'select' => '*',
+                 'order'  => 'waktu_kuis.desc',
+             ]);
+ 
+             return $response->successful() ? $response->json() : [];
+         });
+     }
 
     /**
      * Ambil hasil kuis per siswa
@@ -455,15 +465,17 @@ class SupabaseService
 
     public function getKelas(): array
     {
-        $response = Http::withHeaders([
-            'apikey'       => $this->serviceKey,
-            'Authorization' => 'Bearer ' . $this->serviceKey,
-        ])->get($this->url . '/rest/v1/kelas', [
-            'select' => '*',
-            'order'  => 'nama_kelas.asc',
-        ]);
+        return Cache::remember('supabase_kelas', 600, function () {
+            $response = Http::withHeaders([
+                'apikey'       => $this->serviceKey,
+                'Authorization' => 'Bearer ' . $this->serviceKey,
+            ])->get($this->url . '/rest/v1/kelas', [
+                'select' => '*',
+                'order'  => 'nama_kelas.asc',
+            ]);
 
-        return $response->successful() ? $response->json() : [];
+            return $response->successful() ? $response->json() : [];
+        });
     }
 
     public function getKelasById(string $id): ?array
@@ -490,9 +502,11 @@ class SupabaseService
             'Prefer'       => 'return=representation',
         ])->post($this->url . '/rest/v1/kelas', $data);
 
-        return $response->successful()
-            ? ['success' => true, 'data' => $response->json()]
-            : ['success' => false, 'message' => 'Gagal membuat kelas'];
+        if ($response->successful()) {
+            Cache::forget('supabase_kelas');
+            return ['success' => true, 'data' => $response->json()];
+        }
+        return ['success' => false, 'message' => 'Gagal membuat kelas'];
     }
 
     public function updateKelas(string $id, array $data): array
@@ -503,9 +517,11 @@ class SupabaseService
             'Prefer'       => 'return=representation',
         ])->patch($this->url . '/rest/v1/kelas?id=eq.' . $id, $data);
 
-        return $response->successful()
-            ? ['success' => true]
-            : ['success' => false, 'message' => 'Gagal update kelas'];
+        if ($response->successful()) {
+            Cache::forget('supabase_kelas');
+            return ['success' => true];
+        }
+        return ['success' => false, 'message' => 'Gagal update kelas'];
     }
 
     public function deleteKelas(string $id): array
@@ -515,9 +531,11 @@ class SupabaseService
             'Authorization' => 'Bearer ' . $this->serviceKey,
         ])->delete($this->url . '/rest/v1/kelas?id=eq.' . $id);
 
-        return $response->successful()
-            ? ['success' => true]
-            : ['success' => false, 'message' => 'Gagal hapus kelas'];
+        if ($response->successful()) {
+            Cache::forget('supabase_kelas');
+            return ['success' => true];
+        }
+        return ['success' => false, 'message' => 'Gagal hapus kelas'];
     }
 
     /**
@@ -549,9 +567,11 @@ class SupabaseService
             'Prefer'       => 'return=representation',
         ])->post($this->url . '/rest/v1/users', $data);
 
-        return $response->successful()
-            ? ['success' => true, 'data' => $response->json()]
-            : ['success' => false, 'message' => 'Gagal membuat siswa'];
+        if ($response->successful()) {
+            Cache::forget('supabase_siswa');
+            return ['success' => true, 'data' => $response->json()];
+        }
+        return ['success' => false, 'message' => 'Gagal membuat siswa'];
     }
 
     /**
@@ -565,9 +585,11 @@ class SupabaseService
             'Prefer'       => 'return=representation',
         ])->patch($this->url . '/rest/v1/users?id=eq.' . $id, $data);
 
-        return $response->successful()
-            ? ['success' => true]
-            : ['success' => false, 'message' => 'Gagal update data'];
+        if ($response->successful()) {
+            Cache::forget('supabase_siswa');
+            return ['success' => true];
+        }
+        return ['success' => false, 'message' => 'Gagal update data'];
     }
 
     /**
@@ -580,9 +602,11 @@ class SupabaseService
             'Authorization' => 'Bearer ' . $this->serviceKey,
         ])->delete($this->url . '/rest/v1/users?id=eq.' . $id);
 
-        return $response->successful()
-            ? ['success' => true]
-            : ['success' => false, 'message' => 'Gagal hapus siswa'];
+        if ($response->successful()) {
+            Cache::forget('supabase_siswa');
+            return ['success' => true];
+        }
+        return ['success' => false, 'message' => 'Gagal hapus siswa'];
     }
 
     /**

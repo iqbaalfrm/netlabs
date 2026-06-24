@@ -41,6 +41,8 @@ Route::middleware('auth.guru')->prefix('guru')->group(function () {
     Route::get('/siswa/{id}', [SiswaController::class, 'show'])->name('siswa.show');
     Route::put('/siswa/{id}', [SiswaController::class, 'update'])->name('siswa.update');
     Route::delete('/siswa/{id}', [SiswaController::class, 'destroy'])->name('siswa.destroy');
+    Route::post('/siswa/{id}/reset-password', [SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
+
 
     // Pertemuan & Topik
     Route::get('/pertemuan', [PertemuanController::class, 'index'])->name('pertemuan.index');

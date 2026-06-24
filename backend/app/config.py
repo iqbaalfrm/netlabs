@@ -13,6 +13,12 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 # JWT — secret minimal 32 karakter
 JWT_SECRET = os.getenv("JWT_SECRET", "")
 if len(JWT_SECRET) < 32:
+    if os.getenv("APP_ENV") == "production":
+        raise RuntimeError(
+            "JWT_SECRET wajib diisi di .env untuk production "
+            "(minimal 32 karakter). Generate dengan: "
+            "python -c 'import secrets; print(secrets.token_urlsafe(48))'"
+        )
     JWT_SECRET = secrets.token_urlsafe(48)
 
 JWT_ALGORITHM = "HS256"

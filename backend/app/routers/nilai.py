@@ -74,12 +74,16 @@ async def rekap_nilai(
     query = db.table("hasil_kuis").select("*, users(nama, nis, kelas)", count="exact")
     if pertemuan_id:
         query = query.eq("pertemuan_id", pertemuan_id)
+    if kelas:
+        query = query.eq("users.kelas", kelas)
     count_result = query.order("waktu_kuis", desc=True).execute()
     total = count_result.count or 0
 
     data_query = db.table("hasil_kuis").select("*, users(nama, nis, kelas)")
     if pertemuan_id:
         data_query = data_query.eq("pertemuan_id", pertemuan_id)
+    if kelas:
+        data_query = data_query.eq("users.kelas", kelas)
     result = data_query.order("waktu_kuis", desc=True).range(offset, offset + limit - 1).execute()
 
     return paginate_response(result.data or [], page, limit, total)

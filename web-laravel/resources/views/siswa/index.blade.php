@@ -94,6 +94,19 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Pagination Controls --}}
+        <div class="d-flex align-items-center justify-content-between mt-4 flex-wrap gap-2">
+            <div class="text-muted" style="font-size: 14px" id="paginationInfo">
+                Menampilkan 0 dari 0 siswa
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination mb-0" id="paginationControls">
+                    {{-- Di-generate otomatis oleh JavaScript --}}
+                </ul>
+            </nav>
+        </div>
+
     </div>
 </div>
 
@@ -149,11 +162,102 @@
 
 @push('scripts')
 <script>
-document.getElementById('searchInput').addEventListener('input', function() {
-    const keyword = this.value.toLowerCase();
-    document.querySelectorAll('#tableSiswa tbody tr').forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(keyword) ? '' : 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    
+    // Ambil baris tabel asli (selain baris kosong "Belum ada siswa")
+    const rows = Array.from(document.querySelectorAll('#tableSiswa tbody tr')).filter(row => {
+        return !(row.cells.length === 1 && row.cells[0].colSpan === 7);
     });
+    
+    let filteredRows = [...rows];
+
+    const paginationInfo = document.getElementById('paginationInfo');
+    const paginationControls = document.getElementById('paginationControls');
+    const searchInput = document.getElementById('searchInput');
+
+    function updatePagination() {
+        const totalRows = filteredRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+        
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        // Sembunyikan semua baris
+        document.querySelectorAll('#tableSiswa tbody tr').forEach(row => row.style.display = 'none');
+
+        // Tampilkan baris kosong jika tidak ada data sama sekali
+        if (totalRows === 0) {
+            const emptyRow = document.querySelector('#tableSiswa tbody tr');
+            if (emptyRow && emptyRow.cells.length === 1) {
+                emptyRow.style.display = '';
+            }
+            paginationInfo.textContent = 'Menampilkan 0 dari 0 siswa';
+            paginationControls.innerHTML = '';
+            return;
+        }
+
+        // Tampilkan baris untuk halaman aktif
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, totalRows);
+        
+        for (let i = start; i < end; i++) {
+            if (filteredRows[i]) {
+                filteredRows[i].style.display = '';
+            }
+        }
+
+        // Update teks info pagination
+        paginationInfo.textContent = `Menampilkan ${start + 1}-${end} dari ${totalRows} siswa`;
+
+        // Render tombol navigasi
+        paginationControls.innerHTML = '';
+
+        // Tombol Sebelumnya
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;"><i class="mdi mdi-chevron-left"></i></a>`;
+        paginationControls.appendChild(prevLi);
+
+        // Tombol Halaman Angka
+        for (let i = 1; i <= totalPages; i++) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>`;
+            paginationControls.appendChild(pageLi);
+        }
+
+        // Tombol Selanjutnya
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;"><i class="mdi mdi-chevron-right"></i></a>`;
+        paginationControls.appendChild(nextLi);
+    }
+
+    window.changePage = function(page) {
+        currentPage = page;
+        updatePagination();
+    };
+
+    // Filter Pencarian yang terintegrasi dengan Pagination
+    searchInput.addEventListener('input', function() {
+        const keyword = this.value.toLowerCase();
+        
+        if (keyword.trim() === '') {
+            filteredRows = [...rows];
+        } else {
+            filteredRows = rows.filter(row => {
+                return row.textContent.toLowerCase().includes(keyword);
+            });
+        }
+        
+        currentPage = 1;
+        updatePagination();
+    });
+
+    // Jalankan inisialisasi pertama kali
+    updatePagination();
 });
 </script>
 @endpush

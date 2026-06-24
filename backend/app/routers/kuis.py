@@ -1,35 +1,14 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
 
 from app.database import db
 from app.middleware.auth import guru_only, siswa_only, get_current_user
+from app.schemas import SoalCreate, JawabanItem, SubmitKuis
 from app.helpers.pagination import paginate_params, paginate_response
 
 router = APIRouter()
-
-
-class SoalCreate(BaseModel):
-    pertemuan_id: str
-    pertanyaan: str
-    pilihan_a: str
-    pilihan_b: str
-    pilihan_c: str
-    pilihan_d: str
-    jawaban_benar: str = Field(min_length=1, max_length=1)
-    penjelasan: Optional[str] = None
-
-
-class JawabanKuis(BaseModel):
-    soal_id: str
-    jawaban: str = Field(min_length=1, max_length=1)
-
-
-class SubmitKuisRequest(BaseModel):
-    pertemuan_id: str
-    jawaban: List[JawabanKuis]
 
 
 @router.get("/soal")
@@ -114,7 +93,7 @@ async def cek_hasil_kuis(pertemuan_id: str, user: dict = Depends(siswa_only)):
 
 
 @router.post("/submit")
-async def submit_kuis(request: SubmitKuisRequest, user: dict = Depends(siswa_only)):
+async def submit_kuis(request: SubmitKuis, user: dict = Depends(siswa_only)):
     """Submit jawaban kuis dan simpan nilai siswa."""
     if not request.jawaban:
         raise HTTPException(status_code=422, detail="Jawaban kuis tidak boleh kosong")

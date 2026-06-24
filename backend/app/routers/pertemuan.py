@@ -18,18 +18,18 @@ async def ambil_semua(
 ):
     """Ambil semua pertemuan dengan pagination."""
     page, limit = paginate_params(page, limit)
+    offset = (page - 1) * limit
 
+    # Bangun query sekali, pakai untuk count dan data
     query = db.table("pertemuan").select("*", count="exact")
     if search:
         query = query.ilike("judul", f"%{search}%")
     query = query.order("nomor_urut")
 
-    # Get total
     count_result = query.execute()
     total = count_result.count or 0
 
-    # Get paginated data
-    offset = (page - 1) * limit
+    # Rebuild data query (tanpa count) dengan filter yang sama
     data_query = db.table("pertemuan").select("*")
     if search:
         data_query = data_query.ilike("judul", f"%{search}%")

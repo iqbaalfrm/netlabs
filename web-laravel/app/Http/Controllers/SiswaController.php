@@ -32,7 +32,7 @@ class SiswaController extends Controller
             'nama' => 'required|string|max:100',
             'nis' => 'required|string|max:20',
             'kelas' => 'required|string|max:20',
-            'password' => 'required|string|min:6',
+            'password' => ['required', 'string', \Illuminate\Validation\Rules\Password::min(6)->letters()->numbers()],
         ]);
 
         $result = $this->supabase->createSiswa([
@@ -103,5 +103,24 @@ class SiswaController extends Controller
         return redirect()->route('siswa.index')
             ->with($result['success'] ? 'success' : 'error',
                    $result['success'] ? 'Siswa berhasil dihapus' : $result['message']);
+    }
+
+    public function resetPassword(string $id)
+    {
+        $siswa = $this->supabase->getSiswaById($id);
+
+        if (!$siswa) {
+            return redirect()->route('siswa.index')->with('error', 'Siswa tidak ditemukan');
+        }
+
+        // Reset password ke default (yaitu NIS siswa tersebut)
+        $defaultPassword = $siswa['nis'];
+        $result = $this->supabase->updateUser($id, [
+            'password_hash' => password_hash($defaultPassword, PASSWORD_BCRYPT),
+        ]);
+
+        return redirect()->route('siswa.show', $id)
+            ->with($result['success'] ? 'success' : 'error',
+                   $result['success'] ? 'Password siswa berhasil di-reset menjadi default (NIS)' : $result['message']);
     }
 }

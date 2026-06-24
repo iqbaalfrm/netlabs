@@ -39,7 +39,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item font-weight-semibold d-none d-lg-block ms-0">
                         <h1 class="welcome-text">Panel Guru</h1>
-                        <h3 class="welcome-sub-text">SMK — Jaringan Komputer Dasar</h3>
+
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -135,10 +135,10 @@
                 <footer class="footer">
                     <div class="d-sm-flex justify-content-center justify-content-sm-between">
                         <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">
-                            Netlabs — ITS + LMS Praktikum Jaringan Komputer
+                            Netlabs
                         </span>
                         <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">
-                            Skripsi 2026
+                            Copyright &copy; 2026
                         </span>
                     </div>
                 </footer>

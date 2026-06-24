@@ -46,7 +46,7 @@
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover table-bordered">
+            <table class="table table-hover table-bordered" id="tableNilai">
                 <thead>
                     <tr>
                         <th style="min-width:180px">Nama Siswa</th>
@@ -106,7 +106,19 @@
             </table>
         </div>
 
-        <div class="mt-3 d-flex gap-3">
+        {{-- Pagination Controls --}}
+        <div class="d-flex align-items-center justify-content-between mt-4 flex-wrap gap-2">
+            <div class="text-muted" style="font-size: 14px" id="paginationInfo">
+                Menampilkan 0 dari 0 siswa
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination mb-0" id="paginationControls">
+                    {{-- Di-generate otomatis oleh JavaScript --}}
+                </ul>
+            </nav>
+        </div>
+
+        <div class="mt-4 d-flex gap-3">
             <small><span class="badge bg-success">≥ 75</span> Di atas KKM</small>
             <small><span class="badge bg-danger">&lt; 75</span> Di bawah KKM</small>
         </div>
@@ -114,3 +126,89 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    
+    const table = document.getElementById('tableNilai');
+    if (!table) return;
+
+    // Ambil baris tabel asli (selain baris kosong "Belum ada data nilai")
+    const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => {
+        return !(row.cells.length === 1 && row.cells[0].colSpan > 3);
+    });
+
+    const paginationInfo = document.getElementById('paginationInfo');
+    const paginationControls = document.getElementById('paginationControls');
+
+    function updatePagination() {
+        const totalRows = rows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+        
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        // Sembunyikan semua baris
+        table.querySelectorAll('tbody tr').forEach(row => row.style.display = 'none');
+
+        // Tampilkan baris kosong jika tidak ada data sama sekali
+        if (totalRows === 0) {
+            const emptyRow = table.querySelector('tbody tr');
+            if (emptyRow && emptyRow.cells.length === 1) {
+                emptyRow.style.display = '';
+            }
+            paginationInfo.textContent = 'Menampilkan 0 dari 0 siswa';
+            paginationControls.innerHTML = '';
+            return;
+        }
+
+        // Tampilkan baris untuk halaman aktif
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, totalRows);
+        
+        for (let i = start; i < end; i++) {
+            if (rows[i]) {
+                rows[i].style.display = '';
+            }
+        }
+
+        // Update teks info pagination
+        paginationInfo.textContent = `Menampilkan ${start + 1}-${end} dari ${totalRows} siswa`;
+
+        // Render tombol navigasi
+        paginationControls.innerHTML = '';
+
+        // Tombol Sebelumnya
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;"><i class="mdi mdi-chevron-left"></i></a>`;
+        paginationControls.appendChild(prevLi);
+
+        // Tombol Halaman Angka
+        for (let i = 1; i <= totalPages; i++) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>`;
+            paginationControls.appendChild(pageLi);
+        }
+
+        // Tombol Selanjutnya
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;"><i class="mdi mdi-chevron-right"></i></a>`;
+        paginationControls.appendChild(nextLi);
+    }
+
+    window.changePage = function(page) {
+        currentPage = page;
+        updatePagination();
+    };
+
+    // Jalankan inisialisasi pertama kali
+    updatePagination();
+});
+</script>
+@endpush

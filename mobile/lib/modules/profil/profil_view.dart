@@ -293,7 +293,7 @@ class ProfilView extends StatelessWidget {
             Text('Netlabs v1.0.0', style: tt.titleMedium),
             const SizedBox(height: 8),
             Text(
-              'Platform ITS + LMS\nPraktikum Jaringan Komputer Dasar\n\nDibuat untuk skripsi 2026.',
+              'Platform LMS Praktikum Jaringan Komputer.',
               style: tt.bodyMedium?.copyWith(height: 1.6),
               textAlign: TextAlign.center),
             const SizedBox(height: 20),

@@ -50,11 +50,20 @@
                     <small class="text-muted text-uppercase fw-semibold">Sekolah</small>
                     <p class="mb-0 mt-1">{{ $siswa['sekolah'] ?? 'Tidak diisi' }}</p>
                 </div>
-                <div>
+                <div class="mb-3">
                     <small class="text-muted text-uppercase fw-semibold">Bergabung</small>
                     <p class="mb-0 mt-1">{{ \Carbon\Carbon::parse($siswa['created_at'])->format('d M Y') }}</p>
                 </div>
+                <hr>
+                <form action="{{ route('siswa.reset-password', $siswa['id']) }}" method="POST" 
+                      onsubmit="return confirm('Apakah Anda yakin ingin mereset password siswa ini menjadi default (NIS siswa)?')">
+                    @csrf
+                    <button type="submit" class="btn btn-warning btn-sm w-100">
+                        <i class="mdi mdi-lock-reset me-1"></i> Reset Password ke Default
+                    </button>
+                </form>
             </div>
+
         </div>
     </div>
 

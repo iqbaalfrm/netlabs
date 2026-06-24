@@ -1,58 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../../app/routes/app_routes.dart';
-import '../../app/services/api_service.dart';
 
+import '../../app/services/api_service.dart';
+import '../../models/siswa.dart';
+
+/// Controller untuk halaman login
 class AuthController extends GetxController {
   final nisController = TextEditingController();
   final passwordController = TextEditingController();
-  var passwordTersembunyi = true.obs;
-  var sedangLoading = false.obs;
+  final formKey = GlobalKey<FormState>();
 
-  void togglePassword() => passwordTersembunyi.value = !passwordTersembunyi.value;
+  final _storage = GetStorage();
+  final sedangLoading = false.obs;
+  final passwordTersembunyi = true.obs;
 
-  void login() async {
-    if (nisController.text.isEmpty || passwordController.text.isEmpty) {
-      Get.snackbar('Gagal', 'NIS dan Password harus diisi',
-          backgroundColor: Colors.red.shade100, colorText: Colors.red.shade800);
-      return;
-    }
+  void togglePassword() => passwordTersembunyi.toggle();
 
-    sedangLoading.value = true;
-
-    final result = await ApiService.login(
-      nisController.text.trim(),
-      passwordController.text.trim(),
-    );
-
-    sedangLoading.value = false;
-
-    if (result['success'] == true) {
-      Get.offAllNamed(Routes.home);
-    } else {
-      final message = result['message'] ?? 'Login gagal';
-
-      if (message.contains('Tidak bisa terhubung') || message.contains('timeout')) {
-        _loginDummy();
-      } else {
-        Get.snackbar('Login Gagal', message,
-            backgroundColor: Colors.red.shade100, colorText: Colors.red.shade800);
-      }
-    }
+  String? validateNis(String? value) {
+    if (value == null || value.trim().isEmpty) return 'NIS wajib diisi';
+    return null;
   }
 
-  void _loginDummy() {
-    final storage = GetStorage();
-    storage.write('token', 'demo-token');
-    storage.write('user', {
-      'id': '1',
-      'nama': 'Iqbal',
-      'nis': '2122100045',
-      'kelas': 'XI TKJ 2',
-      'role': 'siswa',
-    });
-    Get.offAllNamed(Routes.home);
+  String? validatePassword(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Kata sandi wajib diisi';
+    if (value.length < 4) return 'Kata sandi minimal 4 karakter';
+    return null;
+  }
+
+  Future<void> login() async {
+    if (!formKey.currentState!.validate()) return;
+
+    sedangLoading.value = true;
+    try {
+      final result = await ApiService.login(
+        nisController.text.trim(),
+        passwordController.text,
+      );
+
+      if (result['success'] == true) {
+        final user = Siswa.fromJson(result['user']);
+        _storage.write('isLoggedIn', true);
+        _storage.write('user', result['user']);
+        Get.offAllNamed('/home');
+      } else {
+        Get.snackbar(
+          'Login Gagal',
+          result['message'] ?? 'NIS atau password salah',
+          backgroundColor: Colors.red.shade50,
+          colorText: Colors.red.shade800,
+        );
+      }
+    } finally {
+      sedangLoading.value = false;
+    }
   }
 
   @override
