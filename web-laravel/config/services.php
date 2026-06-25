@@ -35,21 +35,9 @@ return [
         ],
     ],
 
-    // Konfigurasi Supabase
-    'supabase' => [
-        'url'         => env('SUPABASE_URL'),
-        'anon_key'    => env('SUPABASE_ANON_KEY'),
-        'service_key' => env('SUPABASE_SERVICE_KEY'),
-    ],
-
-    // Railway Backend URL
-    'railway' => [
-        'url' => env('RAILWAY_URL', 'https://netlabs-backend-production.up.railway.app'),
-    ],
-
-    // FastAPI Backend (untuk RAG trigger dll)
+    // FastAPI RAG Backend
     'backend' => [
-        'url' => env('BACKEND_URL', 'http://localhost:8000'),
+        'url' => env('RAG_SERVICE_URL', 'http://127.0.0.1:5001'),
     ],
 
 ];

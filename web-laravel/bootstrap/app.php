@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.guru' => \App\Http\Middleware\AuthGuru::class,
         ]);
 
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        // SecurityHeaders dihandle via Nginx
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
