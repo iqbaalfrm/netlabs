@@ -1,112 +1,56 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Login — Netlabs Admin</title>
-
-    <link rel="stylesheet" href="{{ asset('assets/css/vendor.bundle.base.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/star-admin2.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
-
-    <style>
-        .auth .brand-logo img { width: 100%; }
-        .auth .login-half-bg { background: linear-gradient(135deg, #4B49AC 0%, #7978E9 100%); }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netlabs | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#2D6A4F', 'primary-dark': '#1B4332' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body>
-    <div class="container-scroller">
-        <div class="container-fluid page-body-wrapper full-page-wrapper">
-            <div class="content-wrapper d-flex align-items-center auth px-0">
-                <div class="row w-100 mx-0">
-                    <div class="col-lg-4 mx-auto">
-                        <div class="auth-form-light text-left py-5 px-4 px-sm-5">
-
-                            {{-- Brand --}}
-                            <div class="brand-logo d-flex align-items-center gap-2 mb-3">
-                                <div class="rounded d-flex align-items-center justify-content-center"
-                                     style="width:48px;height:48px;background:#4B49AC">
-                                    <i class="mdi mdi-lan text-white" style="font-size:24px"></i>
-                                </div>
-                                <div>
-                                    <h4 class="fw-bold mb-0">Netlabs</h4>
-                                    <small class="text-muted">Panel Guru</small>
-                                </div>
-                            </div>
-
-                            <h4 class="fw-bold">Selamat Datang</h4>
-                            <h6 class="fw-light text-muted mb-4">Login untuk melanjutkan ke panel admin</h6>
-
-                            {{-- Errors --}}
-                            @if($errors->has('login'))
-                                <div class="alert alert-danger d-flex align-items-center gap-2">
-                                    <i class="mdi mdi-alert-circle"></i>
-                                    {{ $errors->first('login') }}
-                                </div>
-                            @endif
-
-                            @if(session('error'))
-                                <div class="alert alert-danger d-flex align-items-center gap-2">
-                                    <i class="mdi mdi-alert-circle"></i>
-                                    {{ session('error') }}
-                                </div>
-                            @endif
-
-                            <form action="{{ route('login.post') }}" method="POST">
-                                @csrf
-
-                                <div class="form-group">
-                                    <label class="form-label">NIS / ID Guru</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-transparent">
-                                            <i class="mdi mdi-account-outline text-primary"></i>
-                                        </span>
-                                        <input type="text" name="nis"
-                                               class="form-control form-control-lg @error('nis') is-invalid @enderror"
-                                               placeholder="Contoh: GURU001"
-                                               value="{{ old('nis') }}" autofocus>
-                                    </div>
-                                    @error('nis')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                <div class="form-group mt-3">
-                                    <label class="form-label">Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-transparent">
-                                            <i class="mdi mdi-lock-outline text-primary"></i>
-                                        </span>
-                                        <input type="password" name="password"
-                                               class="form-control form-control-lg @error('password') is-invalid @enderror"
-                                               placeholder="Masukkan password">
-                                    </div>
-                                    @error('password')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                <div class="mt-4">
-                                    <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn w-100">
-                                        <i class="mdi mdi-login me-2"></i>Masuk
-                                    </button>
-                                </div>
-                            </form>
-
-                            <div class="mt-4 p-3 rounded" style="background:#f0efff">
-                                <small class="text-muted">
-                                    <strong class="text-primary">Akun demo:</strong>
-                                    NIS <code>GURU001</code> · Password <code>guru123</code>
-                                </small>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <div class="text-center mb-6">
+            <div class="text-primary text-4xl mb-2"><i class="fas fa-network-wired"></i></div>
+            <h1 class="text-2xl font-bold text-gray-800">Netlabs Admin</h1>
+            <p class="text-gray-500 text-sm">Praktikum Jaringan Komputer</p>
         </div>
-    </div>
 
-    <script src="{{ asset('assets/js/vendor.bundle.base.js') }}"></script>
+        @if (session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{{ session('error') }}</div>
+        @endif
+
+        @if ($errors->any())
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            @foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach
+        </div>
+        @endif
+
+        <form action="{{ route('login') }}" method="POST">
+            @csrf
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                <input type="password" name="password" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+            </div>
+            <button type="submit"
+                    class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded transition">
+                <i class="fas fa-sign-in-alt mr-2"></i> Login
+            </button>
+        </form>
+    </div>
 </body>
 </html>

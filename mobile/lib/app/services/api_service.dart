@@ -2,26 +2,29 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// ApiService — semua komunikasi ke backend Netlabs via HTTP
-/// 
+/// ApiService — semua komunikasi ke backend Netlabs Laravel via HTTP
+///
 /// [PENTING] Sebelum deploy:
-/// 1. Ganti `_baseUrl` dengan URL production Railway / VPS
+/// 1. Ganti `_baseUrl` dengan URL production VPS
 /// 2. Untuk development Android emulator gunakan 10.0.2.2 (alias localhost)
 /// 3. Untuk device fisik gunakan IP lokal server (contoh: 192.168.1.x)
 class ApiService {
   // ─── Konfigurasi ────────────────────────────────────────────────────────
-  
+
   /// Ganti base URL sesuai environment:
   /// - Emulator Android : http://10.0.2.2:8000
   /// - Device fisik     : http://192.168.x.x:8000
-  /// - Production       : https://netlabs-api.railway.app  (atau VPS)
+  /// - Production       : https://vps-anda.com  (atau IP VPS)
   static const String _baseUrl = 'http://10.0.2.2:8000';
 
   static final Dio _dio = Dio(BaseOptions(
     baseUrl: _baseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 30),
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
   ));
 
   static final GetStorage _storage = GetStorage();
@@ -31,19 +34,18 @@ class ApiService {
 
   // ─── Inisialisasi ──────────────────────────────────────────────────────
 
-  /// Panggil sekali saat `main()` — set interceptor JWT
+  /// Panggil sekali saat `main()` — set interceptor Bearer token
   static void init() {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         final token = await _secureStorage.read(key: _keyAccessToken);
-        if (token != null) {
+        if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         handler.next(options);
       },
       onError: (error, handler) {
         if (error.response?.statusCode == 401) {
-          // Token expired — bisa redirect ke login
           clearSession();
         }
         handler.next(error);
@@ -59,7 +61,6 @@ class ApiService {
 
   // ─── Helper response ───────────────────────────────────────────────────
 
-  /// Bungkus response Dio menjadi Map yang aman
   static Map<String, dynamic> _ok(dynamic data, {String message = 'OK'}) {
     if (data is Map<String, dynamic>) return data;
     return {'data': data, 'message': message};
@@ -67,8 +68,12 @@ class ApiService {
 
   static Map<String, dynamic> _err(Object e, {String fallback = 'Gagal terhubung ke server'}) {
     if (e is DioException) {
-      final msg = e.response?.data?['detail'] ?? fallback;
-      return {'success': false, 'message': msg.toString()};
+      final msg = e.response?.data?.toString() ?? fallback;
+      // Laravel validation errors
+      if (e.response?.data is Map && (e.response?.data)['message'] != null) {
+        return {'success': false, 'message': (e.response?.data)['message'].toString()};
+      }
+      return {'success': false, 'message': msg};
     }
     return {'success': false, 'message': fallback};
   }
@@ -77,7 +82,8 @@ class ApiService {
   //  AUTH
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Login siswa/guru — POST /api/auth/login
+  /// Login guru — POST /api/auth/login
+  /// Response Laravel: { user: {...}, token: "..." }
   static Future<Map<String, dynamic>> login(String nis, String password) async {
     try {
       final res = await _dio.post('/api/auth/login', data: {
@@ -85,12 +91,12 @@ class ApiService {
         'password': password,
       });
 
-      final token = res.data['data']['token'];
-      final user = res.data['data']['user'];
+      final token = res.data['token'] as String;
+      final user = res.data['user'] as Map<String, dynamic>;
 
       // Simpan token & user
       await _secureStorage.write(key: _keyAccessToken, value: token);
-      await _secureStorage.write(key: _keyUserId, value: user['id']);
+      await _secureStorage.write(key: _keyUserId, value: user['id'].toString());
       _storage.write('token', token);
       _storage.write('user', user);
 
@@ -100,7 +106,30 @@ class ApiService {
     }
   }
 
-  /// Logout — POST /api/auth/logout
+  /// Login siswa — POST /api/auth/login-siswa
+  /// Response Laravel: { user: {...}, token: "..." }
+  static Future<Map<String, dynamic>> loginSiswa(String nis, String password) async {
+    try {
+      final res = await _dio.post('/api/auth/login-siswa', data: {
+        'nis': nis.trim(),
+        'password': password,
+      });
+
+      final token = res.data['token'] as String;
+      final user = res.data['user'] as Map<String, dynamic>;
+
+      await _secureStorage.write(key: _keyAccessToken, value: token);
+      await _secureStorage.write(key: _keyUserId, value: user['id'].toString());
+      _storage.write('token', token);
+      _storage.write('user', user);
+
+      return {'success': true, 'token': token, 'user': user};
+    } catch (e) {
+      return _err(e);
+    }
+  }
+
+  /// Logout — POST /api/auth/logout (Bearer token dihapus di server)
   static Future<void> logout() async {
     try {
       await _dio.post('/api/auth/logout');
@@ -114,36 +143,26 @@ class ApiService {
   static Future<Map<String, dynamic>> getMe() async {
     try {
       final res = await _dio.get('/api/auth/me');
-      _storage.write('user', res.data['data']);
-      return _ok(res.data);
+      final user = res.data is Map ? res.data as Map<String, dynamic> : (res.data['data'] ?? res.data);
+      _storage.write('user', user);
+      return {'success': true, 'data': user};
     } catch (e) {
       return _err(e);
     }
   }
 
-  /// Update profil — PUT /api/auth/profil
-  static Future<Map<String, dynamic>> updateProfil({String? nama, String? sekolah}) async {
-    try {
-      final body = <String, dynamic>{};
-      if (nama != null) body['nama'] = nama;
-      if (sekolah != null) body['sekolah'] = sekolah;
-      await _dio.put('/api/auth/profil', data: body);
-      return {'success': true, 'message': 'Profil berhasil diperbarui'};
-    } catch (e) {
-      return _err(e);
-    }
-  }
-
-  /// Ganti password — POST /api/auth/ganti-password
+  /// Update password — POST /api/auth/update-password
   static Future<Map<String, dynamic>> gantiPassword({
     required String passwordLama,
     required String passwordBaru,
   }) async {
     try {
-      final body = <String, dynamic>{'password_baru': passwordBaru};
-      if (passwordLama.isNotEmpty) body['password_lama'] = passwordLama;
-      await _dio.post('/api/auth/ganti-password', data: body);
-      return {'success': true, 'message': 'Sandi berhasil diganti'};
+      await _dio.post('/api/auth/update-password', data: {
+        'password_lama': passwordLama,
+        'password_baru': passwordBaru,
+        'password_baru_confirmation': passwordBaru,
+      });
+      return {'success': true, 'message': 'Password berhasil diganti'};
     } catch (e) {
       return _err(e);
     }
@@ -153,23 +172,24 @@ class ApiService {
   //  PERTEMUAN
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Ambil semua pertemuan — GET /api/pertemuan/
-  static Future<List> getPertemuan({int page = 1, int limit = 20}) async {
+  /// Ambil semua pertemuan — GET /api/pertemuan
+  static Future<List> getPertemuan() async {
     try {
-      final res = await _dio.get('/api/pertemuan/', queryParameters: {
-        'page': page, 'limit': limit,
-      });
+      final res = await _dio.get('/api/pertemuan');
+      // Laravel apiResource returns array directly
+      if (res.data is List) return res.data as List;
       return (res.data['data'] as List?) ?? [];
     } catch (e) {
       return [];
     }
   }
 
-  /// Detail pertemuan + daftar topik — GET /api/pertemuan/{pertemuan_id}
+  /// Detail pertemuan — GET /api/pertemuan/{pertemuan_id}
   static Future<Map<String, dynamic>> getDetailPertemuan(String pertemuanId) async {
     try {
       final res = await _dio.get('/api/pertemuan/$pertemuanId');
-      return _ok(res.data);
+      if (res.data is Map) return _ok(res.data);
+      return _ok({'data': res.data});
     } catch (e) {
       return _err(e);
     }
@@ -179,86 +199,115 @@ class ApiService {
   //  TOPIK
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Ambil daftar topik — GET /api/topik/{pertemuan_id}
-  static Future<List> getTopik(String pertemuanId, {int page = 1, int limit = 20}) async {
-    try {
-      final res = await _dio.get('/api/topik/$pertemuanId', queryParameters: {
-        'page': page, 'limit': limit,
-      });
-      return (res.data['data'] as List?) ?? [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  /// Detail topik — GET /api/topik/detail/{topik_id}
+  /// Detail topik — GET /api/topik/{topik_id}
   static Future<Map<String, dynamic>> getDetailTopik(String topikId) async {
     try {
-      final res = await _dio.get('/api/topik/detail/$topikId');
-      return _ok(res.data);
-    } catch (e) {
-      return _err(e);
-    }
-  }
-
-  /// Tandai topik sudah dibaca — POST /api/topik/{topik_id}/baca
-  static Future<Map<String, dynamic>> tandaiTopikDibaca(String topikId) async {
-    try {
-      await _dio.post('/api/topik/$topikId/baca');
-      return {'success': true, 'message': 'Materi berhasil ditandai selesai'};
+      final res = await _dio.get('/api/topik/$topikId');
+      if (res.data is Map) return _ok(res.data);
+      return _ok({'data': res.data});
     } catch (e) {
       return _err(e);
     }
   }
 
   // ════════════════════════════════════════════════════════════════════════
-  //  MODUL PDF
+  //  PROGRESS
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Ambil daftar modul — GET /api/modul/{pertemuan_id}
-  static Future<List> getModul(String pertemuanId) async {
+  /// Ambil progress user — GET /api/progress
+  static Future<List> getProgress() async {
     try {
-      final res = await _dio.get('/api/modul/$pertemuanId');
+      final res = await _dio.get('/api/progress');
+      if (res.data is List) return res.data as List;
       return (res.data['data'] as List?) ?? [];
     } catch (e) {
       return [];
     }
   }
+
+  /// Tandai topik selesai — POST /api/progress/{topikId}/selesai
+  static Future<Map<String, dynamic>> tandaiTopikSelesai(String topikId) async {
+    try {
+      final res = await _dio.post('/api/progress/$topikId/selesai');
+      return _ok(res.data, message: 'Materi berhasil ditandai selesai');
+    } catch (e) {
+      return _err(e);
+    }
+  }
+
+  /// Reset progress topik — DELETE /api/progress/{topikId}
+  static Future<Map<String, dynamic>> resetProgress(String topikId) async {
+    try {
+      await _dio.delete('/api/progress/$topikId');
+      return {'success': true, 'message': 'Progress direset'};
+    } catch (e) {
+      return _err(e);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  MODUL PDF (via topik/pertemuan)
+  // ════════════════════════════════════════════════════════════════════════
+
+  /// Modul sudah termasuk dalam response detail pertemuan & topik.
+  /// Tidak ada endpoint dedicated, gunakan getDetailPertemuan() atau getDetailTopik()
 
   // ════════════════════════════════════════════════════════════════════════
   //  KUIS
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Ambil soal kuis — GET /api/kuis/{pertemuan_id}
-  static Future<List> getSoalKuis(String pertemuanId) async {
+  /// Ambil soal kuis — GET /api/kuis/{pertemuanId}/soal
+  static Future<List<Map<String, dynamic>>> getSoalKuis(String pertemuanId) async {
     try {
-      final res = await _dio.get('/api/kuis/$pertemuanId');
-      return (res.data['data'] as List?) ?? [];
+      final res = await _dio.get('/api/kuis/$pertemuanId/soal');
+      if (res.data is List) {
+        return (res.data as List).map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+      final list = (res.data['data'] as List?) ?? [];
+      return list.map((e) => Map<String, dynamic>.from(e)).toList();
     } catch (e) {
       return [];
     }
   }
 
-  /// Cek apakah kuis sudah dikerjakan — GET /api/kuis/{pertemuan_id}/hasil
-  static Future<Map<String, dynamic>> cekHasilKuis(String pertemuanId) async {
+  /// Submit jawaban kuis — POST /api/kuis/{pertemuanId}/jawaban
+  /// Body: { jawaban: [ { soal_id: "...", jawaban: "A" }, ... ] }
+  static Future<Map<String, dynamic>> submitKuis(
+      String pertemuanId, List<Map<String, String>> jawaban) async {
     try {
-      final res = await _dio.get('/api/kuis/$pertemuanId/hasil');
+      final body = {
+        'jawaban': jawaban,
+      };
+      final res = await _dio.post('/api/kuis/$pertemuanId/jawaban', data: body);
       return _ok(res.data);
     } catch (e) {
       return _err(e);
     }
   }
 
-  /// Submit jawaban kuis — POST /api/kuis/submit
-  static Future<Map<String, dynamic>> submitKuis(
-      String pertemuanId, List<Map<String, String>> jawaban) async {
+  /// Riwayat kuis — GET /api/kuis/riwayat
+  static Future<List> getRiwayatKuis() async {
     try {
-      final body = {
-        'pertemuan_id': pertemuanId,
-        'jawaban': jawaban,
-      };
-      final res = await _dio.post('/api/kuis/submit', data: body);
-      return _ok(res.data);
+      final res = await _dio.get('/api/kuis/riwayat');
+      if (res.data is List) return res.data as List;
+      return (res.data['data'] as List?) ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Cek hasil kuis untuk pertemuan tertentu (dari riwayat)
+  static Future<Map<String, dynamic>> cekHasilKuis(String pertemuanId) async {
+    try {
+      final riwayat = await getRiwayatKuis();
+      final hasil = riwayat.firstWhere(
+        (r) => r['pertemuan_id'].toString() == pertemuanId,
+        orElse: () => null,
+      );
+      if (hasil != null) {
+        return _ok(hasil);
+      }
+      return {'success': false, 'message': 'Belum mengerjakan kuis'};
     } catch (e) {
       return _err(e);
     }
@@ -268,23 +317,37 @@ class ApiService {
   //  NILAI
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Nilai siswa yang login — GET /api/nilai/saya
-  static Future<Map<String, dynamic>> getNilaiSaya({int page = 1, int limit = 10}) async {
+  /// Nilai siswa yang login — GET /api/nilai/siswa/{siswaId}
+  static Future<Map<String, dynamic>> getNilaiSaya() async {
     try {
-      final res = await _dio.get('/api/nilai/saya', queryParameters: {
-        'page': page, 'limit': limit,
-      });
+      final siswaId = await _secureStorage.read(key: _keyUserId);
+      if (siswaId == null) {
+        return {'success': false, 'message': 'User tidak ditemukan'};
+      }
+      final res = await _dio.get('/api/nilai/siswa/$siswaId');
       return _ok(res.data);
     } catch (e) {
       return _err(e);
     }
   }
 
+  /// Semua nilai (guru) — GET /api/nilai/semua
+  static Future<List> getNilaiSemua() async {
+    try {
+      final res = await _dio.get('/api/nilai/semua');
+      if (res.data is List) return res.data as List;
+      return (res.data['data'] as List?) ?? [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // ════════════════════════════════════════════════════════════════════════
-  //  AI CHAT / RAG
+  //  AI CHAT
   // ════════════════════════════════════════════════════════════════════════
 
-  /// Tanya AI Tutor RAG — POST /api/chat/tanya
+  /// Kirim chat ke AI — POST /api/chat
+  /// Body: { pertanyaan: "...", pertemuan_id: "...", riwayat_chat: [...] }
   static Future<Map<String, dynamic>> tanyaAI({
     required String pertanyaan,
     required String pertemuanId,
@@ -296,24 +359,32 @@ class ApiService {
         'pertemuan_id': pertemuanId,
         'riwayat_chat': riwayatChat,
       };
-      // Timeout lebih lama karena AI butuh waktu
-      final res = await _dio.post('/api/chat/tanya', data: body,
-          options: Options(receiveTimeout: const Duration(seconds: 40)));
+      final res = await _dio.post('/api/chat', data: body,
+          options: Options(receiveTimeout: const Duration(seconds: 60)));
       return _ok(res.data);
     } catch (e) {
       return _err(e, fallback: 'AI Tutor sedang tidak tersedia. Silakan coba lagi.');
     }
   }
 
-  /// Riwayat chat per pertemuan — GET /api/chat/riwayat/{siswa_id}/{pertemuan_id}
-  static Future<List> getRiwayatChat(String siswaId, String pertemuanId,
-      {int page = 1, int limit = 30}) async {
+  /// Riwayat chat user — GET /api/chat
+  static Future<List> getRiwayatChat() async {
     try {
-      final res = await _dio.get('/api/chat/riwayat/$siswaId/$pertemuanId',
-          queryParameters: {'page': page, 'limit': limit});
+      final res = await _dio.get('/api/chat');
+      if (res.data is List) return res.data as List;
       return (res.data['data'] as List?) ?? [];
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Hapus semua riwayat chat — DELETE /api/chat
+  static Future<Map<String, dynamic>> hapusRiwayatChat() async {
+    try {
+      await _dio.delete('/api/chat');
+      return {'success': true, 'message': 'Riwayat chat dihapus'};
+    } catch (e) {
+      return _err(e);
     }
   }
 }

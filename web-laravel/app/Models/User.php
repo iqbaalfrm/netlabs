@@ -2,48 +2,87 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    // Timestamps aktif (created_at, updated_at)
+    public $timestamps = true;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Kolom yang bisa diisi massal.
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',        // enum: admin, guru, siswa
+        'kelas',
+        'no_hp',
+        'foto',
+        'aktif',       // boolean
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
+    // Kolom yang disembunyikan dari JSON
+    protected $hidden = ['password'];
+
+    // Casting tipe data
+    protected $casts = [
+        'aktif' => 'boolean',
     ];
 
+    // ─── JWT Subject ────────────────────────────────────
+
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Dapatkan identifier untuk JWT.
      */
-    protected function casts(): array
+    public function getJWTIdentifier()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->getKey();
+    }
+
+    /**
+     * Dapatkan custom claims JWT.
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
+
+    // ─── Relasi Eloquent ────────────────────────────────
+
+    /**
+     * Satu user memiliki banyak hasil kuis.
+     */
+    public function quizResults()
+    {
+        return $this->hasMany(QuizResult::class);
+    }
+
+    /**
+     * Satu user memiliki banyak chat log.
+     */
+    public function chatLogs()
+    {
+        return $this->hasMany(ChatLog::class);
+    }
+
+    // ─── Helper ─────────────────────────────────────────
+
+    /**
+     * Cek apakah user memiliki role tertentu.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Cek apakah user adalah admin/guru.
+     */
+    public function isGuruOrAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'guru']);
     }
 }

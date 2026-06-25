@@ -1,149 +1,105 @@
-@extends('layouts.admin')
-
-@section('title', $siswa['nama'])
+@extends('layouts.app')
+@section('title', 'Detail Siswa')
 
 @section('content')
-
-{{-- Breadcrumb --}}
-<div class="d-flex align-items-center gap-2 mb-4 text-muted" style="font-size:14px">
-    <a href="{{ route('siswa.index') }}" class="text-muted text-decoration-none">Siswa</a>
-    <i class="mdi mdi-chevron-right" style="font-size:14px"></i>
-    <span class="text-dark fw-semibold">{{ $siswa['nama'] }}</span>
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-gray-800">
+        <i class="fas fa-user-graduate text-primary mr-2"></i>{{ $siswa->name }}
+    </h2>
+    <a href="{{ route('siswa.index') }}"
+       class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded transition text-sm">
+        <i class="fas fa-arrow-left mr-1"></i>Kembali
+    </a>
 </div>
 
-<div class="row">
+{{-- Profil --}}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-3">
+        <i class="fas fa-id-card text-primary mr-2"></i>Profil
+    </h3>
+    <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><span class="text-gray-500">NIS:</span> <span class="font-semibold">{{ $siswa->nis ?? '-' }}</span></div>
+        <div><span class="text-gray-500">Nama:</span> <span class="font-semibold">{{ $siswa->name }}</span></div>
+        <div><span class="text-gray-500">Kelas:</span> <span class="font-semibold">{{ $siswa->kelas ?? '-' }}</span></div>
+        <div><span class="text-gray-500">Email:</span> <span class="font-semibold">{{ $siswa->email ?? '-' }}</span></div>
+    </div>
+</div>
 
-    {{-- Profil --}}
-    <div class="col-lg-4 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body text-center border-bottom pb-4">
-                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
-                     style="width:72px;height:72px;background:linear-gradient(135deg,#4B49AC,#7978E9);
-                            font-size:28px;font-weight:700;color:white">
-                    {{ strtoupper(substr($siswa['nama'], 0, 1)) }}
-                </div>
-                <h5 class="fw-bold mb-1">{{ $siswa['nama'] }}</h5>
-                <p class="text-muted mb-3">{{ $siswa['kelas'] ?? '-' }}</p>
-                <div class="d-flex justify-content-center gap-4">
-                    <div class="text-center">
-                        <h5 class="fw-bold text-warning mb-0">{{ $siswa['streak_hari'] ?? 0 }}</h5>
-                        <small class="text-muted">Streak</small>
-                    </div>
-                    <div style="width:1px;background:#dee2e6"></div>
-                    <div class="text-center">
-                        <h5 class="fw-bold text-primary mb-0">{{ $siswa['total_chat'] ?? 0 }}</h5>
-                        <small class="text-muted">Chat</small>
-                    </div>
-                    <div style="width:1px;background:#dee2e6"></div>
-                    <div class="text-center">
-                        <h5 class="fw-bold text-success mb-0">{{ $rataRata }}</h5>
-                        <small class="text-muted">Rata-rata</small>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted text-uppercase fw-semibold">NIS</small>
-                    <p class="mb-0 mt-1"><code>{{ $siswa['nis'] }}</code></p>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted text-uppercase fw-semibold">Sekolah</small>
-                    <p class="mb-0 mt-1">{{ $siswa['sekolah'] ?? 'Tidak diisi' }}</p>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted text-uppercase fw-semibold">Bergabung</small>
-                    <p class="mb-0 mt-1">{{ \Carbon\Carbon::parse($siswa['created_at'])->format('d M Y') }}</p>
-                </div>
-                <hr>
-                <form action="{{ route('siswa.reset-password', $siswa['id']) }}" method="POST" 
-                      onsubmit="return confirm('Apakah Anda yakin ingin mereset password siswa ini menjadi default (NIS siswa)?')">
-                    @csrf
-                    <button type="submit" class="btn btn-warning btn-sm w-100">
-                        <i class="mdi mdi-lock-reset me-1"></i> Reset Password ke Default
-                    </button>
-                </form>
-            </div>
+{{-- 2 Tab: Riwayat Kuis | Riwayat Chat --}}
+<div x-data="{ tab: 'kuis' }">
+    <div class="flex border-b border-gray-200 mb-4">
+        <button @click="tab = 'kuis'" :class="tab === 'kuis' ? 'border-b-2 border-primary text-primary font-semibold' : 'text-gray-500'"
+                class="px-4 py-2 text-sm transition">
+            <i class="fas fa-clipboard-check mr-1"></i>Riwayat Kuis
+        </button>
+        <button @click="tab = 'chat'" :class="tab === 'chat' ? 'border-b-2 border-primary text-primary font-semibold' : 'text-gray-500'"
+                class="px-4 py-2 text-sm transition">
+            <i class="fas fa-comments mr-1"></i>Riwayat Chat
+        </button>
+    </div>
 
+    {{-- Tab: Riwayat Kuis --}}
+    <div x-show="tab === 'kuis'" x-cloak>
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">Pertemuan</th>
+                        <th class="text-center px-4 py-3">Benar</th>
+                        <th class="text-center px-4 py-3">Total</th>
+                        <th class="text-center px-4 py-3">Nilai</th>
+                        <th class="text-left px-4 py-3">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse ($riwayatKuis as $h)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-800">{{ $h->pertemuan->judul ?? '-' }}</td>
+                        <td class="px-4 py-3 text-center">{{ $h->jumlah_benar }}</td>
+                        <td class="px-4 py-3 text-center">{{ $h->jumlah_soal }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-semibold">
+                                {{ $h->nilai }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500">{{ $h->created_at->format('d/m/Y H:i') }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-400">Belum ada riwayat kuis</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    {{-- Riwayat Kuis --}}
-    <div class="col-lg-8 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="mdi mdi-clipboard-check me-1" style="color:#7B5EA7"></i>
-                    Riwayat Kuis ({{ count($hasilKuis) }})
-                </h4>
-
-                @if(count($hasilKuis) > 0)
-                <div class="mb-4">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <small class="text-muted">Rata-rata nilai</small>
-                        <strong class="text-success">{{ $rataRata }}/100</strong>
-                    </div>
-                    <div class="progress" style="height:8px;border-radius:10px">
-                        <div class="progress-bar" style="width:{{ $rataRata }}%;
-                             background:{{ $rataRata >= 70 ? '#28a745' : '#ffc107' }};
-                             border-radius:10px"></div>
-                    </div>
-                </div>
-                @endif
-
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Pertemuan</th>
-                                <th>Benar</th>
-                                <th>Nilai</th>
-                                <th>Status</th>
-                                <th>Waktu</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($hasilKuis as $h)
-                            <tr>
-                                <td>
-                                    @if(isset($pertemuanMap[$h['pertemuan_id']]))
-                                    <span class="fw-semibold" style="font-size:13px">
-                                        {{ $pertemuanMap[$h['pertemuan_id']]['judul'] }}
-                                    </span>
-                                    @else
-                                    <span class="text-muted" style="font-size:13px">Pertemuan dihapus</span>
-                                    @endif
-                                </td>
-                                <td style="font-size:13px">{{ $h['jumlah_benar'] }}/{{ $h['total_soal'] }}</td>
-                                <td>
-                                    <span class="fw-bold" style="font-size:16px;
-                                        color:{{ $h['nilai'] >= 70 ? '#28a745' : '#dc3545' }}">
-                                        {{ $h['nilai'] }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @if($h['nilai'] >= 70)
-                                    <span class="badge bg-success">Lulus</span>
-                                    @else
-                                    <span class="badge bg-danger">Belum lulus</span>
-                                    @endif
-                                </td>
-                                <td><small class="text-muted">{{ \Carbon\Carbon::parse($h['waktu_kuis'])->format('d M Y H:i') }}</small></td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <i class="mdi mdi-clipboard-off-outline d-block mb-2" style="font-size:48px;opacity:.3"></i>
-                                    <p class="text-muted">Siswa belum mengerjakan kuis apapun</p>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    {{-- Tab: Riwayat Chat --}}
+    <div x-show="tab === 'chat'" x-cloak>
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3">Pertanyaan</th>
+                        <th class="text-left px-4 py-3">Jawaban</th>
+                        <th class="text-left px-4 py-3">Waktu</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse ($riwayatChat as $c)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-800">{{ Str::limit($c->pertanyaan, 60) }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ Str::limit($c->jawaban, 80) }}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs">{{ $c->created_at->format('d/m/Y H:i') }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" class="px-4 py-8 text-center text-gray-400">Belum ada riwayat chat</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
-
 </div>
-
 @endsection

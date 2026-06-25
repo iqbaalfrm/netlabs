@@ -2,36 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\SupabaseService;
+use App\Models\ChatHistory;
+use App\Models\Pertemuan;
+use App\Models\SoalKuis;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
-    private SupabaseService $supabase;
-
-    public function __construct(SupabaseService $supabase)
-    {
-        $this->supabase = $supabase;
-    }
-
     /**
-     * Halaman utama dashboard guru
+     * Dashboard guru — 4 stat card + tabel 10 chat terbaru
      */
     public function index()
     {
-        // Ambil statistik untuk kartu di dashboard
-        $stats = $this->supabase->getDashboardStats();
+        // 4 stat card
+        $stats = [
+            'total_siswa'    => User::where('role', 'siswa')->count(),
+            'total_pertemuan' => Pertemuan::count(),
+            'total_soal'      => SoalKuis::count(),
+            'total_chat'      => ChatHistory::count(),
+        ];
 
-        // Ambil 5 pertemuan terbaru
-        $pertemuan = $this->supabase->getPertemuan();
+        // 10 chat terbaru
+        $chatTerbaru = ChatHistory::with(['user:id,nama,nis', 'pertemuan:id,judul'])
+            ->latest('waktu')
+            ->limit(10)
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'id'              => $c->id,
+                    'siswa_nama'      => $c->user->nama ?? '-',
+                    'siswa_nis'       => $c->user->nis ?? '-',
+                    'pertemuan_judul' => $c->pertemuan->judul ?? '-',
+                    'pesan'           => \Illuminate\Support\Str::limit($c->pesan, 60),
+                    'jawaban'         => \Illuminate\Support\Str::limit($c->jawaban, 80),
+                    'waktu'           => $c->waktu,
+                ];
+            });
 
-        // Ambil 5 siswa terbaru
-        $siswa = $this->supabase->getSiswa();
-        $siswa5Terbaru = array_slice($siswa, 0, 5);
-
-        // Ambil hasil kuis terbaru
-        $rekap = $this->supabase->getRekap();
-        $rekap5Terbaru = array_slice($rekap, 0, 5);
-
-        return view('dashboard', compact('stats', 'pertemuan', 'siswa5Terbaru', 'rekap5Terbaru'));
+        return view('dashboard', compact('stats', 'chatTerbaru'));
     }
 }

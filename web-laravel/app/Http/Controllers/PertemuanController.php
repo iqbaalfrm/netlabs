@@ -2,44 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pertemuan;
+use App\Models\SoalKuis;
+use App\Models\Topik;
 use Illuminate\Http\Request;
-use App\Services\SupabaseService;
 
 class PertemuanController extends Controller
 {
-    private SupabaseService $supabase;
-
-    public function __construct(SupabaseService $supabase)
-    {
-        $this->supabase = $supabase;
-    }
-
     /**
-     * Daftar semua pertemuan
+     * Daftar semua pertemuan (tabel)
      */
     public function index()
     {
-        $pertemuan = $this->supabase->getPertemuan();
+        $pertemuan = Pertemuan::withCount(['topik', 'soal'])->orderBy('nomor_urut')->get();
         return view('pertemuan.index', compact('pertemuan'));
     }
 
     /**
-     * Detail pertemuan — tab: Topik, PDF, Soal Kuis
+     * Form tambah pertemuan
      */
-    public function show(string $id)
+    public function create()
     {
-        $pertemuan = $this->supabase->getPertemuanById($id);
-
-        if (!$pertemuan) {
-            return redirect()->route('pertemuan.index')
-                ->with('error', 'Pertemuan tidak ditemukan');
-        }
-
-        $topik    = $this->supabase->getTopikByPertemuan($id);
-        $modul    = $this->supabase->getModulPdf($id);
-        $soal     = $this->supabase->getSoalKuis($id);
-
-        return view('pertemuan.show', compact('pertemuan', 'topik', 'modul', 'soal'));
+        return view('pertemuan.create');
     }
 
     /**
@@ -48,274 +32,80 @@ class PertemuanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor_urut' => 'required|integer|min:1',
-            'judul'      => 'required|string|max:200',
+            'judul'      => 'required|string|max:255',
             'deskripsi'  => 'nullable|string',
-            'warna_hex'  => 'nullable|string|max:10',
+            'nomor_urut' => 'required|integer|min:1',
+            'warna_hex'  => 'nullable|string|max:7',
         ]);
 
-        $guru = session('guru');
-
-        $result = $this->supabase->createPertemuan([
-            'nomor_urut'  => (int) $request->nomor_urut,
-            'judul'       => $request->judul,
-            'deskripsi'   => $request->deskripsi ?? '',
-            'warna_hex'   => $request->warna_hex ?? '#2D7DD2',
-            'dibuat_oleh' => $guru['id'],
+        Pertemuan::create([
+            'judul'      => $request->judul,
+            'deskripsi'  => $request->deskripsi,
+            'nomor_urut' => $request->nomor_urut,
+            'warna_hex'  => $request->warna_hex ?? '#2D6A4F',
+            'dibuat_oleh'=> session('guru_id'),
         ]);
 
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
+        return redirect()->route('pertemuan.index')->with('success', 'Pertemuan berhasil ditambahkan');
+    }
 
-        return redirect()->route('pertemuan.index')
-            ->with('success', 'Pertemuan berhasil dibuat');
+    /**
+     * Detail pertemuan + 3 tab: Topik | Soal | Upload PDF
+     */
+    public function show($id)
+    {
+        $p = Pertemuan::with(['topik' => function ($q) {
+            $q->orderBy('nomor_urut');
+        }, 'soal'])->findOrFail($id);
+
+        // Tab aktif (default: topik)
+        $tab = request('tab', 'topik');
+
+        return view('pertemuan.show', compact('p', 'tab'));
+    }
+
+    /**
+     * Form edit pertemuan
+     */
+    public function edit($id)
+    {
+        $pertemuan = Pertemuan::findOrFail($id);
+        return view('pertemuan.edit', compact('pertemuan'));
     }
 
     /**
      * Update pertemuan
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
+        $pertemuan = Pertemuan::findOrFail($id);
+
         $request->validate([
-            'nomor_urut' => 'required|integer|min:1',
-            'judul'      => 'required|string|max:200',
+            'judul'      => 'required|string|max:255',
             'deskripsi'  => 'nullable|string',
-            'warna_hex'  => 'nullable|string|max:10',
-        ]);
-
-        $result = $this->supabase->updatePertemuan($id, [
-            'nomor_urut' => (int) $request->nomor_urut,
-            'judul'      => $request->judul,
-            'deskripsi'  => $request->deskripsi ?? '',
-            'warna_hex'  => $request->warna_hex ?? '#2D7DD2',
-        ]);
-
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
-
-        return redirect()->route('pertemuan.show', $id)
-            ->with('success', 'Pertemuan berhasil diperbarui');
-    }
-
-    /**
-     * Hapus pertemuan
-     */
-    public function destroy(string $id)
-    {
-        $result = $this->supabase->deletePertemuan($id);
-
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
-
-        return redirect()->route('pertemuan.index')
-            ->with('success', 'Pertemuan berhasil dihapus');
-    }
-
-    // ===== TOPIK =====
-
-    /**
-     * Detail topik — modul PDF + soal kuis
-     */
-    public function showTopik(string $pertemuanId, string $topikId)
-    {
-        $pertemuan = $this->supabase->getPertemuanById($pertemuanId);
-        if (!$pertemuan) {
-            return redirect()->route('pertemuan.index')->with('error', 'Pertemuan tidak ditemukan');
-        }
-
-        $topik = $this->supabase->getTopikById($topikId);
-        if (!$topik) {
-            return redirect()->route('pertemuan.show', $pertemuanId)->with('error', 'Topik tidak ditemukan');
-        }
-
-        $modul = $this->supabase->getModulByTopik($topikId);
-        $soal = $this->supabase->getSoalByTopik($topikId);
-
-        return view('pertemuan.topik-show', compact('pertemuan', 'topik', 'modul', 'soal'));
-    }
-
-    /**
-     * Simpan topik baru
-     */
-    public function storeTopik(Request $request, string $pertemuanId)
-    {
-        $request->validate([
-            'judul'       => 'required|string|max:200',
-            'isi_materi'  => 'required|string',
-            'nomor_urut'  => 'required|integer|min:1',
-        ]);
-
-        $result = $this->supabase->createTopik([
-            'pertemuan_id' => $pertemuanId,
-            'judul'        => $request->judul,
-            'isi_materi'   => $request->isi_materi,
-            'nomor_urut'   => (int) $request->nomor_urut,
-        ]);
-
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
-
-        return redirect()->route('pertemuan.show', $pertemuanId)
-            ->with('success', 'Topik berhasil ditambahkan')->withFragment('tab-topik');
-    }
-
-    /**
-     * Update topik
-     */
-    public function updateTopik(Request $request, string $pertemuanId, string $topikId)
-    {
-        $request->validate([
-            'judul'      => 'required|string|max:200',
-            'isi_materi' => 'required|string',
             'nomor_urut' => 'required|integer|min:1',
+            'warna_hex'  => 'nullable|string|max:7',
         ]);
 
-        $result = $this->supabase->updateTopik($topikId, [
-            'judul'      => $request->judul,
-            'isi_materi' => $request->isi_materi,
-            'nomor_urut' => (int) $request->nomor_urut,
-        ]);
+        $pertemuan->update($request->only(['judul', 'deskripsi', 'nomor_urut', 'warna_hex']));
 
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
-
-        return redirect()->route('pertemuan.show', $pertemuanId)
-            ->with('success', 'Topik berhasil diperbarui')->withFragment('tab-topik');
+        return redirect()->route('pertemuan.show', $id)->with('success', 'Pertemuan berhasil diperbarui');
     }
 
     /**
-     * Hapus topik
+     * Hapus pertemuan beserta topik & soal terkait
      */
-    public function destroyTopik(string $pertemuanId, string $topikId)
+    public function destroy($id)
     {
-        $result = $this->supabase->deleteTopik($topikId);
+        $pertemuan = Pertemuan::findOrFail($id);
 
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
+        // Hapus topik, soal, modul terkait (cascade manual biar jelas)
+        Topik::where('pertemuan_id', $id)->delete();
+        SoalKuis::where('pertemuan_id', $id)->delete();
+        \App\Models\ModulPdf::where('pertemuan_id', $id)->delete();
 
-        return redirect()->route('pertemuan.show', $pertemuanId)
-            ->with('success', 'Topik berhasil dihapus')->withFragment('tab-topik');
-    }
+        $pertemuan->delete();
 
-    // ===== SOAL KUIS =====
-
-    /**
-     * Simpan soal baru
-     */
-    public function storeSoal(Request $request, string $pertemuanId)
-    {
-        $request->validate([
-            'pertanyaan'   => 'required|string',
-            'pilihan_a'    => 'required|string',
-            'pilihan_b'    => 'required|string',
-            'pilihan_c'    => 'required|string',
-            'pilihan_d'    => 'required|string',
-            'jawaban_benar' => 'required|in:A,B,C,D',
-            'penjelasan'   => 'nullable|string',
-        ]);
-
-        $result = $this->supabase->createSoal([
-            'pertemuan_id'  => $pertemuanId,
-            'pertanyaan'    => $request->pertanyaan,
-            'pilihan_a'     => $request->pilihan_a,
-            'pilihan_b'     => $request->pilihan_b,
-            'pilihan_c'     => $request->pilihan_c,
-            'pilihan_d'     => $request->pilihan_d,
-            'jawaban_benar' => $request->jawaban_benar,
-            'penjelasan'    => $request->penjelasan ?? '',
-        ]);
-
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
-
-        return redirect()->route('pertemuan.show', $pertemuanId)
-            ->with('success', 'Soal berhasil ditambahkan')->withFragment('tab-kuis');
-    }
-
-    /**
-     * Upload PDF — kirim multipart ke Railway backend
-     */
-    public function uploadModul(Request $request, string $pertemuanId)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:pdf|max:20480', // max 20MB
-        ], [
-            'file.required' => 'Pilih file PDF terlebih dahulu',
-            'file.mimes'    => 'Hanya file PDF yang diizinkan',
-            'file.max'      => 'Ukuran file maksimal 20MB',
-        ]);
-
-        $token = session('guru_token');
-
-        if (!$token) {
-            return back()->with('error', 'Sesi habis, silakan login ulang');
-        }
-
-        try {
-            // Kirim file ke Railway backend sebagai multipart
-            $response = \Illuminate\Support\Facades\Http::withToken($token)
-                ->timeout(60)
-                ->attach(
-                    'file',
-                    file_get_contents($request->file('file')->getRealPath()),
-                    $request->file('file')->getClientOriginalName()
-                )
-                ->post(config('services.railway.url') . '/api/modul/upload', [
-                    'pertemuan_id' => $pertemuanId,
-                ]);
-
-            if ($response->successful()) {
-                return redirect()->route('pertemuan.show', $pertemuanId)
-                    ->with('success', 'PDF berhasil diupload dan diindex untuk AI Tutor')
-                    ->withFragment('tab-pdf');
-            }
-
-            $msg = $response->json('detail') ?? 'Upload gagal';
-            return back()->with('error', $msg);
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal terhubung ke server: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Hapus modul PDF via Railway backend
-     */
-    public function destroyModul(string $pertemuanId, string $modulId)
-    {
-        $token = session('guru_token');
-
-        try {
-            \Illuminate\Support\Facades\Http::withToken($token)
-                ->delete(config('services.railway.url') . '/api/modul/' . $modulId);
-        } catch (\Exception $e) {
-            // Lanjutkan walau gagal hapus di backend
-        }
-
-        return redirect()->route('pertemuan.show', $pertemuanId)
-            ->with('success', 'Modul berhasil dihapus')
-            ->withFragment('tab-pdf');
-    }
-
-    /**
-     * Hapus soal
-     */
-    public function destroySoal(string $pertemuanId, string $soalId)
-    {
-        $result = $this->supabase->deleteSoal($soalId);
-
-        if (!$result['success']) {
-            return back()->with('error', $result['message']);
-        }
-
-        return redirect()->route('pertemuan.show', $pertemuanId)
-            ->with('success', 'Soal berhasil dihapus')->withFragment('tab-kuis');
+        return redirect()->route('pertemuan.index')->with('success', 'Pertemuan berhasil dihapus');
     }
 }
