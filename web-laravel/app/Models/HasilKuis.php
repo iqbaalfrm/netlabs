@@ -10,7 +10,7 @@ class HasilKuis extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'user_id',
+        'siswa_id',
         'pertemuan_id',
         'skor',
         'benar',
@@ -21,9 +21,9 @@ class HasilKuis extends Model
     /**
      * Relasi ke user (siswa)
      */
-    public function user()
+    public function siswa()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'siswa_id');
     }
 
     /**

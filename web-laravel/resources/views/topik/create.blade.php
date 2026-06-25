@@ -15,25 +15,13 @@
                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
         </div>
         <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Deskripsi</label>
-            <textarea name="deskripsi" rows="4"
-                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">{{ old('deskripsi') }}</textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Urutan</label>
-                <input type="number" name="urutan" value="{{ old('urutan', 1) }}" required min="1"
-                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Estimasi (menit)</label>
-                <input type="number" name="estimasi_menit" value="{{ old('estimasi_menit') }}" min="1"
-                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Isi Materi</label>
+            <textarea name="isi" rows="4"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">{{ old('isi') }}</textarea>
         </div>
         <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Link Video</label>
-            <input type="url" name="link_video" value="{{ old('link_video') }}"
+            <label class="block text-gray-700 text-sm font-bold mb-2">Nomor Urut</label>
+            <input type="number" name="nomor_urut" value="{{ old('nomor_urut', 1) }}" required min="1"
                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
         </div>
         <div class="flex gap-2">

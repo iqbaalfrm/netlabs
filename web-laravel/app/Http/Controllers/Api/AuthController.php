@@ -34,14 +34,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if (! $user->aktif) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Akun tidak aktif.',
-                'data'    => null,
-            ], 403);
-        }
-
         $token = auth('api')->login($user);
 
         return response()->json([
@@ -49,7 +41,7 @@ class AuthController extends Controller
             'message' => 'Login berhasil.',
             'data'    => [
                 'token' => $token,
-                'user'  => $user->only('id', 'name', 'email', 'role', 'kelas', 'foto'),
+                'user'  => $user->only('id', 'nama', 'email', 'role', 'kelas'),
             ],
         ]);
     }
@@ -85,7 +77,7 @@ class AuthController extends Controller
             'message' => 'Login berhasil.',
             'data'    => [
                 'token' => $token,
-                'user'  => $user->only('id', 'name', 'email', 'role', 'foto'),
+                'user'  => $user->only('id', 'nama', 'email', 'role'),
             ],
         ]);
     }
@@ -116,7 +108,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data user.',
-            'data'    => $user->only('id', 'name', 'email', 'role', 'kelas', 'no_hp', 'foto'),
+            'data'    => $user->only('id', 'nama', 'nis', 'email', 'role', 'kelas'),
         ]);
     }
 }

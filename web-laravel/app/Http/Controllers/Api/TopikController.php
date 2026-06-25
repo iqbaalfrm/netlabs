@@ -57,7 +57,7 @@ class TopikController extends Controller
         $validated = $request->validate([
             'judul'      => 'required|string|max:255',
             'nomor_urut' => 'required|integer|min:1',
-            'materi'     => 'nullable|string',
+            'isi'        => 'nullable|string',
         ]);
         $validated['pertemuan_id'] = $pertemuanId;
 
@@ -112,7 +112,7 @@ class TopikController extends Controller
         $validated = $request->validate([
             'judul'      => 'sometimes|string|max:255',
             'nomor_urut' => 'sometimes|integer|min:1',
-            'materi'     => 'nullable|string',
+            'isi'       => 'nullable|string',
         ]);
 
         $topik->update($validated);
@@ -173,7 +173,7 @@ class TopikController extends Controller
                 'siswa_id' => $siswaId,
             ],
             [
-                'selesai'     => true,
+                'is_selesai'  => true,
                 'selesai_pada' => now(),
             ]
         );

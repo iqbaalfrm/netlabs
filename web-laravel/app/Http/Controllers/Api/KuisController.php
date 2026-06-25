@@ -52,7 +52,7 @@ class KuisController extends Controller
             'pilihan_b'    => 'required|string',
             'pilihan_c'    => 'required|string',
             'pilihan_d'    => 'required|string',
-            'jawaban'      => 'required|integer|min:0|max:3',
+            'kunci'        => 'required|in:a,b,c,d,e',
         ]);
 
         $soal = SoalKuis::create($validated);
@@ -86,7 +86,7 @@ class KuisController extends Controller
             'pilihan_b'  => 'sometimes|string',
             'pilihan_c'  => 'sometimes|string',
             'pilihan_d'  => 'sometimes|string',
-            'jawaban'    => 'sometimes|integer|min:0|max:3',
+            'kunci'      => 'sometimes|in:a,b,c,d,e',
         ]);
 
         $soal->update($validated);
@@ -140,8 +140,8 @@ class KuisController extends Controller
 
         // Cek apakah siswa sudah pernah submit
         $sudah = HasilKuis::where('siswa_id', $siswaId)
-                          ->where('pertemuan_id', $validated['pertemuan_id'])
-                          ->exists();
+                           ->where('pertemuan_id', $validated['pertemuan_id'])
+                           ->exists();
 
         if ($sudah) {
             return response()->json([
@@ -151,25 +151,25 @@ class KuisController extends Controller
             ], 422);
         }
 
-        $hurufKeIndex = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3];
         $jumlahBenar = 0;
         $totalSoal = count($validated['jawaban']);
 
         foreach ($validated['jawaban'] as $jw) {
             $soal = SoalKuis::find($jw['soal_id']);
-            if ($soal && $hurufKeIndex[$jw['jawaban']] === (int) $soal->jawaban) {
+            if ($soal && $jw['jawaban'] === $soal->kunci) {
                 $jumlahBenar++;
             }
         }
 
-        $nilai = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100) : 0;
+        $jumlahSalah = $totalSoal - $jumlahBenar;
+        $skor = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100) : 0;
 
         $hasil = HasilKuis::create([
             'siswa_id'      => $siswaId,
             'pertemuan_id'  => $validated['pertemuan_id'],
-            'jumlah_benar'  => $jumlahBenar,
-            'total_soal'    => $totalSoal,
-            'nilai'         => $nilai,
+            'benar'         => $jumlahBenar,
+            'salah'         => $jumlahSalah,
+            'skor'          => $skor,
         ]);
 
         return response()->json([

@@ -22,28 +22,30 @@ class ChatController extends Controller
             'riwayat_chat'   => 'nullable|array',
         ]);
 
-        $siswaId = auth('api')->id();
+        $userId = auth('api')->id();
 
-        // Simpan pesan siswa
+        // Simpan pesan siswa ke database
         ChatHistory::create([
-            'siswa_id'      => $siswaId,
+            'siswa_id'      => $userId,
             'pertemuan_id'  => $validated['pertemuan_id'] ?? null,
-            'dari_siswa'    => true,
             'pesan'         => $validated['pertanyaan'],
+            'jawaban'       => '',
         ]);
 
         // Forward ke RAG Service
-        $ragUrl = env('RAG_SERVICE_URL', 'http://127.0.0.1:5001') . '/rag/chat';
+        // Backend FastAPI: POST /api/chat/tanya
+        $ragUrl = env('RAG_SERVICE_URL', 'http://127.0.0.1:8000') . '/api/chat/tanya';
 
         try {
             $response = Http::timeout(30)->post($ragUrl, [
-                'pertanyaan'    => $validated['pertanyaan'],
-                'riwayat_chat'  => $validated['riwayat_chat'] ?? [],
+                'pertanyaan'     => $validated['pertanyaan'],
+                'pertemuan_id'   => $validated['pertemuan_id'] ?? null,
+                'riwayat_chat'   => $validated['riwayat_chat'] ?? [],
             ]);
 
             if ($response->successful()) {
                 $body = $response->json();
-                $jawaban = $body['jawaban'] ?? $body['answer'] ?? $body['response'] ?? 'Maaf, tidak ada jawaban.';
+                $jawaban = $body['jawaban'] ?? 'Maaf, tidak ada jawaban.';
             } else {
                 $jawaban = 'Layanan AI sedang sibuk, coba lagi nanti.';
             }
@@ -51,12 +53,12 @@ class ChatController extends Controller
             $jawaban = 'Gagal terhubung ke layanan AI.';
         }
 
-        // Simpan balasan AI
+        // Simpan balasan AI ke database
         $chatBalasan = ChatHistory::create([
-            'siswa_id'      => $siswaId,
+            'siswa_id'      => $userId,
             'pertemuan_id'  => $validated['pertemuan_id'] ?? null,
-            'dari_siswa'    => false,
-            'pesan'         => $jawaban,
+            'pesan'         => $validated['pertanyaan'],
+            'jawaban'       => $jawaban,
         ]);
 
         return response()->json([
@@ -74,7 +76,7 @@ class ChatController extends Controller
     public function riwayat($siswaId): JsonResponse
     {
         $data = ChatHistory::where('siswa_id', $siswaId)
-                           ->orderBy('created_at')
+                           ->orderBy('waktu')
                            ->limit(100)
                            ->get();
 

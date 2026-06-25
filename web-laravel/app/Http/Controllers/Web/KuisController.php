@@ -34,17 +34,17 @@ class KuisController extends Controller
             'pilihan_b'    => 'required|string|max:500',
             'pilihan_c'    => 'required|string|max:500',
             'pilihan_d'    => 'required|string|max:500',
-            'kunci_jawaban'=> 'required|in:A,B,C,D',
+            'kunci' => 'required|in:a,b,c,d',
         ]);
 
         SoalKuis::create([
-            'pertemuan_id'  => $pertemuanId,
-            'pertanyaan'    => $validated['pertanyaan'],
-            'pilihan_a'     => $validated['pilihan_a'],
-            'pilihan_b'     => $validated['pilihan_b'],
-            'pilihan_c'     => $validated['pilihan_c'],
-            'pilihan_d'     => $validated['pilihan_d'],
-            'kunci_jawaban' => $validated['kunci_jawaban'],
+            'pertemuan_id' => $pertemuanId,
+            'pertanyaan'   => $validated['pertanyaan'],
+            'pilihan_a'    => $validated['pilihan_a'],
+            'pilihan_b'    => $validated['pilihan_b'],
+            'pilihan_c'    => $validated['pilihan_c'],
+            'pilihan_d'    => $validated['pilihan_d'],
+            'kunci'        => $validated['kunci'],
         ]);
 
         return redirect('/pertemuan/' . $pertemuanId)->with('success', 'Soal kuis berhasil ditambahkan.');
@@ -75,7 +75,7 @@ class KuisController extends Controller
             'pilihan_b'    => 'required|string|max:500',
             'pilihan_c'    => 'required|string|max:500',
             'pilihan_d'    => 'required|string|max:500',
-            'kunci_jawaban'=> 'required|in:A,B,C,D',
+            'kunci' => 'required|in:a,b,c,d',
         ]);
 
         $soal->update($validated);

@@ -11,26 +11,19 @@ class User extends Authenticatable implements JWTSubject
     public $timestamps = true;
 
     /**
-     * Kolom yang bisa diisi massal.
+     * Kolom yang bisa diisi massal (sesuai tabel users di DB).
      */
     protected $fillable = [
-        'name',
+        'nis',
+        'nama',
         'email',
         'password',
-        'role',        // enum: admin, guru, siswa
+        'role',        // enum: guru, siswa
         'kelas',
-        'no_hp',
-        'foto',
-        'aktif',       // boolean
     ];
 
     // Kolom yang disembunyikan dari JSON
     protected $hidden = ['password'];
-
-    // Casting tipe data
-    protected $casts = [
-        'aktif' => 'boolean',
-    ];
 
     // ─── JWT Subject ────────────────────────────────────
 
@@ -43,11 +36,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Dapatkan custom claims JWT.
+     * Dapatkan custom claims JWT (tambahkan role dan nama di token).
      */
     public function getJWTCustomClaims(): array
     {
-        return [];
+        return [
+            'role' => $this->role,
+            'nama' => $this->nama,
+        ];
     }
 
     // ─── Relasi Eloquent ────────────────────────────────
@@ -55,17 +51,25 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Satu user memiliki banyak hasil kuis.
      */
-    public function quizResults()
+    public function hasilKuis()
     {
-        return $this->hasMany(QuizResult::class);
+        return $this->hasMany(HasilKuis::class, 'siswa_id');
     }
 
     /**
-     * Satu user memiliki banyak chat log.
+     * Satu user memiliki banyak chat history.
      */
-    public function chatLogs()
+    public function chatHistory()
     {
-        return $this->hasMany(ChatLog::class);
+        return $this->hasMany(ChatHistory::class, 'siswa_id');
+    }
+
+    /**
+     * Satu user memiliki banyak progress topik.
+     */
+    public function progressTopik()
+    {
+        return $this->hasMany(ProgressTopik::class, 'siswa_id');
     }
 
     // ─── Helper ─────────────────────────────────────────
@@ -79,10 +83,10 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Cek apakah user adalah admin/guru.
+     * Cek apakah user adalah guru.
      */
-    public function isGuruOrAdmin(): bool
+    public function isGuru(): bool
     {
-        return in_array($this->role, ['admin', 'guru']);
+        return $this->role === 'guru';
     }
 }

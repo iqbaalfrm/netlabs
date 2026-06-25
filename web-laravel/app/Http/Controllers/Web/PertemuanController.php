@@ -17,7 +17,7 @@ class PertemuanController extends Controller
     public function index(): View
     {
         $pertemuan = Pertemuan::withCount(['topik', 'soalKuis'])
-                              ->orderBy('urutan')
+                               ->orderBy('nomor_urut')
                               ->get();
 
         return view('pertemuan.index', compact('pertemuan'));
@@ -39,9 +39,8 @@ class PertemuanController extends Controller
         $validated = $request->validate([
             'judul'        => 'required|string|max:255',
             'deskripsi'    => 'nullable|string',
-            'urutan'       => 'required|integer|min:1',
-            'tanggal'      => 'nullable|date',
-            'kode_ruangan' => 'nullable|string|max:50',
+            'nomor_urut'   => 'required|integer|min:1',
+            'status'       => 'nullable|in:aktif,selesai,terkunci',
         ]);
 
         Pertemuan::create($validated);
@@ -79,9 +78,8 @@ class PertemuanController extends Controller
         $validated = $request->validate([
             'judul'        => 'required|string|max:255',
             'deskripsi'    => 'nullable|string',
-            'urutan'       => 'required|integer|min:1',
-            'tanggal'      => 'nullable|date',
-            'kode_ruangan' => 'nullable|string|max:50',
+            'nomor_urut'   => 'required|integer|min:1',
+            'status'       => 'nullable|in:aktif,selesai,terkunci',
         ]);
 
         $pertemuan->update($validated);

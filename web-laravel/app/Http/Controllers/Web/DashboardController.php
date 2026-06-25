@@ -22,8 +22,8 @@ class DashboardController extends Controller
             'totalPertemuan'=> Pertemuan::count(),
             'totalSoal'     => SoalKuis::count(),
             'totalChat'     => ChatHistory::count(),
-            'chatTerbaru'   => ChatHistory::with('siswa:id,name')
-                                    ->orderBy('created_at', 'desc')
+            'chatTerbaru'   => ChatHistory::with('siswa:id,nama')
+                                    ->orderBy('waktu', 'desc')
                                     ->limit(10)
                                     ->get(),
         ]);

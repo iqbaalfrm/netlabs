@@ -46,12 +46,12 @@ class AuthController extends Controller
         // Simpan ke session
         session(['guru' => [
             'id'    => $user->id,
-            'name'  => $user->name,
+            'nama'  => $user->nama,
             'email' => $user->email,
             'role'  => $user->role,
         ]]);
 
-        return redirect('/dashboard')->with('success', 'Selamat datang, ' . $user->name . '!');
+        return redirect('/dashboard')->with('success', 'Selamat datang, ' . $user->nama . '!');
     }
 
     /**

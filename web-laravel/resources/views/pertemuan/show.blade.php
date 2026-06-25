@@ -23,15 +23,11 @@
     <div class="grid grid-cols-4 gap-4 text-sm">
         <div>
             <span class="text-gray-500">Urutan:</span>
-            <span class="font-semibold">{{ $pertemuan->urutan }}</span>
+            <span class="font-semibold">{{ $pertemuan->nomor_urut }}</span>
         </div>
         <div>
-            <span class="text-gray-500">Tanggal:</span>
-            <span class="font-semibold">{{ $pertemuan->tanggal ? date('d/m/Y', strtotime($pertemuan->tanggal)) : '-' }}</span>
-        </div>
-        <div>
-            <span class="text-gray-500">Ruangan:</span>
-            <span class="font-semibold">{{ $pertemuan->kode_ruangan ?? '-' }}</span>
+            <span class="text-gray-500">Status:</span>
+            <span class="font-semibold">{{ $pertemuan->status ?? '-' }}</span>
         </div>
     </div>
     @if ($pertemuan->deskripsi)
@@ -78,9 +74,9 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($pertemuan->topik as $t)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-500">{{ $t->urutan }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $t->nomor_urut }}</td>
                         <td class="px-4 py-3 font-medium text-gray-800">{{ $t->judul }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $t->estimasi_menit ? $t->estimasi_menit . ' menit' : '-' }}</td>
+                        <td class="px-4 py-3 text-gray-500">-</td>
                         <td class="px-4 py-3 text-center">
                             <a href="{{ route('topik.edit', $t->id) }}" class="text-yellow-500 hover:text-yellow-600 mr-2"
                                title="Edit"><i class="fas fa-edit"></i></a>
@@ -127,7 +123,7 @@
                         <td class="px-4 py-3 text-gray-700">{{ $s->id }}</td>
                         <td class="px-4 py-3 text-gray-800">{{ \Illuminate\Support\Str::limit($s->pertanyaan, 80) }}</td>
                         <td class="px-4 py-3 text-center">
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">{{ $s->kunci_jawaban }}</span>
+                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">{{ strtoupper($s->kunci) }}</span>
                         </td>
                         <td class="px-4 py-3 text-center">
                             <a href="{{ route('kuis.edit', $s->id) }}" class="text-yellow-500 hover:text-yellow-600 mr-2"

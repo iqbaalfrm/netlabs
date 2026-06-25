@@ -21,10 +21,10 @@ class SiswaController extends Controller
 
         $siswa = User::where('role', 'siswa')
                      ->when($search, function ($q) use ($search) {
-                         $q->where('name', 'like', "%{$search}%")
-                           ->orWhere('email', 'like', "%{$search}%");
+                         $q->where('nama', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
                      })
-                     ->orderBy('name')
+                     ->orderBy('nama')
                      ->paginate(15)
                      ->withQueryString();
 
@@ -40,12 +40,12 @@ class SiswaController extends Controller
         $siswa = User::where('role', 'siswa')->findOrFail($id);
         $riwayatKuis = HasilKuis::with('pertemuan:id,judul')
                                ->where('siswa_id', $id)
-                               ->orderBy('created_at', 'desc')
+                               ->orderBy('waktu_mulai', 'desc')
                                ->limit(20)
                                ->get();
         $riwayatChat = ChatHistory::with('pertemuan:id,judul')
-                                 ->where('siswa_id', $id)
-                                 ->orderBy('created_at', 'desc')
+                                  ->where('siswa_id', $id)
+                                  ->orderBy('waktu', 'desc')
                                  ->limit(20)
                                  ->get();
 

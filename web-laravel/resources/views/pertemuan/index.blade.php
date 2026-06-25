@@ -21,7 +21,7 @@
                 <th class="text-left px-4 py-3">Judul</th>
                 <th class="text-left px-4 py-3">Topik</th>
                 <th class="text-left px-4 py-3">Soal</th>
-                <th class="text-left px-4 py-3">Tanggal</th>
+                <th class="text-left px-4 py-3">Status</th>
                 <th class="text-center px-4 py-3">Aksi</th>
             </tr>
         </thead>
@@ -30,7 +30,7 @@
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 text-gray-700">{{ $p->id }}</td>
                 <td class="px-4 py-3">
-                    <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $p->urutan }}</span>
+                    <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ $p->nomor_urut }}</span>
                 </td>
                 <td class="px-4 py-3 font-medium text-gray-800">
                     <a href="{{ route('pertemuan.show', $p->id) }}" class="hover:text-primary">
@@ -39,7 +39,7 @@
                 </td>
                 <td class="px-4 py-3 text-gray-500">{{ $p->topik_count }}</td>
                 <td class="px-4 py-3 text-gray-500">{{ $p->soal_kuis_count }}</td>
-                <td class="px-4 py-3 text-gray-500">{{ $p->tanggal ? date('d/m/Y', strtotime($p->tanggal)) : '-' }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ $p->status ?? '-' }}</td>
                 <td class="px-4 py-3 text-center">
                     <a href="{{ route('pertemuan.show', $p->id) }}" class="text-primary hover:text-primary-dark mr-2"
                        title="Detail"><i class="fas fa-eye"></i></a>

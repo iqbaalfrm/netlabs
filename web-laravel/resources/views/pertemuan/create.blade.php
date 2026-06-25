@@ -22,21 +22,19 @@
                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">{{ old('deskripsi') }}</textarea>
         </div>
 
-        <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Urutan</label>
-                <input type="number" name="urutan" value="{{ old('urutan', 1) }}" required min="1"
+                <label class="block text-gray-700 text-sm font-bold mb-2">Nomor Urut</label>
+                <input type="number" name="nomor_urut" value="{{ old('nomor_urut', 1) }}" required min="1"
                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
             </div>
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal</label>
-                <input type="date" name="tanggal" value="{{ old('tanggal') }}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
-            </div>
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Kode Ruangan</label>
-                <input type="text" name="kode_ruangan" value="{{ old('kode_ruangan') }}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="selesai" {{ old('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    <option value="terkunci" {{ old('status') == 'terkunci' ? 'selected' : '' }}>Terkunci</option>
+                </select>
             </div>
         </div>
 

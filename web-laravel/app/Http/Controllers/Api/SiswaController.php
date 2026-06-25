@@ -16,8 +16,8 @@ class SiswaController extends Controller
     {
         // Hanya user dengan role 'siswa'
         $data = User::where('role', 'siswa')
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'email', 'kelas', 'no_hp', 'foto', 'aktif']);
+                    ->orderBy('nama')
+                    ->get(['id', 'nama', 'email', 'kelas']);
 
         return response()->json([
             'success' => true,
@@ -44,7 +44,7 @@ class SiswaController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $siswa->only('id', 'name', 'email', 'kelas', 'no_hp', 'foto', 'aktif'),
+            'data'    => $siswa->only('id', 'nama', 'email', 'kelas'),
             'message' => 'Detail siswa.',
         ]);
     }

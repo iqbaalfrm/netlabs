@@ -29,18 +29,16 @@ class TopikController extends Controller
     public function store(Request $request, $pertemuanId): RedirectResponse
     {
         $validated = $request->validate([
-            'judul'    => 'required|string|max:255',
-            'konten'   => 'nullable|string',
-            'urutan'   => 'nullable|integer|min:1',
-            'estimasi_menit' => 'nullable|integer|min:1',
+            'judul'      => 'required|string|max:255',
+            'isi'        => 'nullable|string',
+            'nomor_urut' => 'nullable|integer|min:1',
         ]);
 
         Topik::create([
-            'pertemuan_id'  => $pertemuanId,
-            'judul'         => $validated['judul'],
-            'konten'        => $validated['konten'] ?? null,
-            'urutan'        => $validated['urutan'] ?? 0,
-            'estimasi_menit'=> $validated['estimasi_menit'] ?? null,
+            'pertemuan_id' => $pertemuanId,
+            'judul'        => $validated['judul'],
+            'isi'          => $validated['isi'] ?? null,
+            'nomor_urut'   => $validated['nomor_urut'] ?? 0,
         ]);
 
         return redirect('/pertemuan/' . $pertemuanId)->with('success', 'Topik berhasil ditambahkan.');
@@ -66,10 +64,9 @@ class TopikController extends Controller
         $topik = Topik::findOrFail($id);
 
         $validated = $request->validate([
-            'judul'    => 'required|string|max:255',
-            'konten'   => 'nullable|string',
-            'urutan'   => 'nullable|integer|min:1',
-            'estimasi_menit' => 'nullable|integer|min:1',
+            'judul'      => 'required|string|max:255',
+            'isi'        => 'nullable|string',
+            'nomor_urut' => 'nullable|integer|min:1',
         ]);
 
         $topik->update($validated);
