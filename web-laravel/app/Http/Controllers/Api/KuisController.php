@@ -124,8 +124,27 @@ class KuisController extends Controller
     }
 
     /**
+     * Riwayat hasil kuis siswa.
+     * GET /api/kuis/riwayat/{user_id}
+     */
+    public function riwayat($userId): JsonResponse
+    {
+        $riwayat = HasilKuis::with('pertemuan:id,judul')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $riwayat,
+            'message' => 'Riwayat kuis.',
+        ]);
+    }
+
+    /**
      * Submit hasil kuis.
      * POST /api/kuis/hasil
+     * Alias: POST /api/kuis/jawaban
      */
     public function submitHasil(Request $request): JsonResponse
     {

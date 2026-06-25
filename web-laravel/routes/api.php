@@ -13,13 +13,18 @@ use App\Http\Controllers\Api\KuisController as ApiKuis;
 use App\Http\Controllers\Api\ChatController as ApiChat;
 use App\Http\Controllers\Api\SiswaController as ApiSiswa;
 use App\Http\Controllers\Api\ModulController as ApiModul;
+use App\Http\Controllers\Api\ProgressController as ApiProgress;
+use App\Http\Controllers\Api\NilaiController as ApiNilai;
 
 // ─── Auth ───────────────────────────────────────────
-Route::post('/auth/login-siswa', [AuthController::class, 'loginSiswa']);
-Route::post('/auth/login-guru',  [AuthController::class, 'loginGuru']);
-Route::post('/auth/logout',      [AuthController::class, 'logout'])
+Route::post('/auth/login',          [AuthController::class, 'login']);
+Route::post('/auth/login-siswa',    [AuthController::class, 'loginSiswa']);
+Route::post('/auth/login-guru',     [AuthController::class, 'loginGuru']);
+Route::post('/auth/logout',         [AuthController::class, 'logout'])
     ->middleware('auth:api');
-Route::get('/auth/me',           [AuthController::class, 'me'])
+Route::get('/auth/me',              [AuthController::class, 'me'])
+    ->middleware('auth:api');
+Route::post('/auth/update-password', [AuthController::class, 'updatePassword'])
     ->middleware('auth:api');
 
 // ─── Protected (JWT) ────────────────────────────────
@@ -46,10 +51,21 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/kuis/soal/{id}',       [ApiKuis::class, 'updateSoal']);
     Route::delete('/kuis/soal/{id}',    [ApiKuis::class, 'destroySoal']);
     Route::post('/kuis/hasil',          [ApiKuis::class, 'submitHasil']);
+    Route::post('/kuis/jawaban',        [ApiKuis::class, 'submitHasil']); // alias
+    Route::get('/kuis/riwayat/{user_id}', [ApiKuis::class, 'riwayat']);
 
     // Chat AI (forward ke RAG)
     Route::post('/chat',                       [ApiChat::class, 'send']);
     Route::get('/chat/riwayat/{user_id}',      [ApiChat::class, 'riwayat']);
+    Route::delete('/chat/{user_id}',           [ApiChat::class, 'destroy']);
+
+    // Progress Topik
+    Route::get('/progress/{pertemuan_id}',           [ApiProgress::class, 'index']);
+    Route::post('/progress/{topik_id}/selesai',      [ApiProgress::class, 'tandaiSelesai']);
+
+    // Nilai
+    Route::get('/nilai',                [ApiNilai::class, 'index']);
+    Route::get('/nilai/{pertemuan_id}', [ApiNilai::class, 'show']);
 
     // Modul PDF
     Route::post('/modul/upload',                [ApiModul::class, 'upload']);

@@ -78,6 +78,7 @@ class ChatController extends Controller
     /**
      * Riwayat chat per siswa.
      * GET /api/chat/riwayat/{user_id}
+     * Alias: GET /api/chat?user_id=...
      */
     public function riwayat($siswaId): JsonResponse
     {
@@ -90,6 +91,21 @@ class ChatController extends Controller
             'success' => true,
             'data'    => $data,
             'message' => 'Riwayat chat.',
+        ]);
+    }
+
+    /**
+     * Hapus seluruh riwayat chat siswa.
+     * DELETE /api/chat/{user_id}
+     */
+    public function destroy($siswaId): JsonResponse
+    {
+        ChatHistory::where('user_id', $siswaId)->delete();
+
+        return response()->json([
+            'success' => true,
+            'data'    => null,
+            'message' => 'Riwayat chat dihapus.',
         ]);
     }
 }
