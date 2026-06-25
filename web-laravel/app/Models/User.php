@@ -53,7 +53,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function hasilKuis()
     {
-        return $this->hasMany(HasilKuis::class, 'siswa_id');
+        return $this->hasMany(HasilKuis::class, 'user_id');
     }
 
     /**
@@ -61,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function chatHistory()
     {
-        return $this->hasMany(ChatHistory::class, 'siswa_id');
+        return $this->hasMany(ChatHistory::class, 'user_id');
     }
 
     /**
@@ -69,7 +69,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function progressTopik()
     {
-        return $this->hasMany(ProgressTopik::class, 'siswa_id');
+        return $this->hasMany(ProgressTopik::class, 'user_id');
     }
 
     // ─── Helper ─────────────────────────────────────────

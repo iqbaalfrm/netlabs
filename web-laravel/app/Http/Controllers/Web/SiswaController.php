@@ -39,12 +39,12 @@ class SiswaController extends Controller
     {
         $siswa = User::where('role', 'siswa')->findOrFail($id);
         $riwayatKuis = HasilKuis::with('pertemuan:id,judul')
-                               ->where('siswa_id', $id)
-                               ->orderBy('waktu_mulai', 'desc')
+                               ->where('user_id', $id)
+                               ->orderBy('dikerjakan_pada', 'desc')
                                ->limit(20)
                                ->get();
         $riwayatChat = ChatHistory::with('pertemuan:id,judul')
-                                  ->where('siswa_id', $id)
+                                  ->where('user_id', $id)
                                   ->orderBy('waktu', 'desc')
                                  ->limit(20)
                                  ->get();

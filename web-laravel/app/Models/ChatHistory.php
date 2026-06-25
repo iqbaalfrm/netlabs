@@ -10,7 +10,7 @@ class ChatHistory extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'siswa_id',
+        'user_id',
         'pertemuan_id',
         'pesan',
         'jawaban',
@@ -22,7 +22,7 @@ class ChatHistory extends Model
      */
     public function siswa()
     {
-        return $this->belongsTo(User::class, 'siswa_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

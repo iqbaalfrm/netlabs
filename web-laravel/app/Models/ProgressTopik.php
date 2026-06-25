@@ -10,7 +10,7 @@ class ProgressTopik extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'siswa_id',
+        'user_id',
         'topik_id',
         'is_selesai',
         'selesai_pada',
@@ -21,7 +21,7 @@ class ProgressTopik extends Model
      */
     public function siswa()
     {
-        return $this->belongsTo(User::class, 'siswa_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

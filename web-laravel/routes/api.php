@@ -19,6 +19,8 @@ Route::post('/auth/login-siswa', [AuthController::class, 'loginSiswa']);
 Route::post('/auth/login-guru',  [AuthController::class, 'loginGuru']);
 Route::post('/auth/logout',      [AuthController::class, 'logout'])
     ->middleware('auth:api');
+Route::get('/auth/me',           [AuthController::class, 'me'])
+    ->middleware('auth:api');
 
 // ─── Protected (JWT) ────────────────────────────────
 Route::middleware('auth:api')->group(function () {
@@ -47,11 +49,12 @@ Route::middleware('auth:api')->group(function () {
 
     // Chat AI (forward ke RAG)
     Route::post('/chat',                       [ApiChat::class, 'send']);
-    Route::get('/chat/riwayat/{siswa_id}',     [ApiChat::class, 'riwayat']);
+    Route::get('/chat/riwayat/{user_id}',      [ApiChat::class, 'riwayat']);
 
     // Modul PDF
     Route::post('/modul/upload',                [ApiModul::class, 'upload']);
     Route::get('/modul/{pertemuan_id}',         [ApiModul::class, 'getByPertemuan']);
+    Route::delete('/modul/{id}',                [ApiModul::class, 'destroy']);
 
     // Siswa
     Route::get('/siswa',        [ApiSiswa::class, 'index']);

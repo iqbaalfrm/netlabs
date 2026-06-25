@@ -133,13 +133,13 @@ class KuisController extends Controller
             'pertemuan_id' => 'required|exists:pertemuan,id',
             'jawaban'      => 'required|array',
             'jawaban.*.soal_id' => 'required|exists:soal_kuis,id',
-            'jawaban.*.jawaban' => 'required|string|in:a,b,c,d',
+            'jawaban.*.jawaban' => 'required|string|in:a,b,c,d,e',
         ]);
 
         $siswaId = auth('api')->id();
 
         // Cek apakah siswa sudah pernah submit
-        $sudah = HasilKuis::where('siswa_id', $siswaId)
+        $sudah = HasilKuis::where('user_id', $siswaId)
                            ->where('pertemuan_id', $validated['pertemuan_id'])
                            ->exists();
 
@@ -165,7 +165,7 @@ class KuisController extends Controller
         $skor = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100) : 0;
 
         $hasil = HasilKuis::create([
-            'siswa_id'      => $siswaId,
+            'user_id'       => $siswaId,
             'pertemuan_id'  => $validated['pertemuan_id'],
             'benar'         => $jumlahBenar,
             'salah'         => $jumlahSalah,

@@ -170,7 +170,7 @@ class TopikController extends Controller
         ProgressTopik::firstOrCreate(
             [
                 'topik_id' => $id,
-                'siswa_id' => $siswaId,
+                'user_id'  => $siswaId,
             ],
             [
                 'is_selesai'  => true,

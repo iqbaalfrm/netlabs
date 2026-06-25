@@ -51,8 +51,17 @@ class PesanRiwayat(BaseModel):
 
 class ChatRequest(BaseModel):
     pertanyaan: str
-    pertemuan_id: str
+    # Laravel bisa kirim null atau int, jadi Optional[str] + coerce
+    pertemuan_id: Optional[str] = None
     riwayat_chat: List[PesanRiwayat] = []
+
+    @field_validator('pertemuan_id', mode='before')
+    @classmethod
+    def _coerce_pertemuan_id(cls, v):
+        """Konversi int → str, dan None tetap None."""
+        if v is None:
+            return None
+        return str(v)
 
     @field_validator('pertanyaan')
     @classmethod

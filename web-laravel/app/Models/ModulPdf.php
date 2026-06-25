@@ -15,6 +15,7 @@ class ModulPdf extends Model
         'path',
         'ukuran_bytes',
         'diupload_oleh',
+        'sudah_diindex',
     ];
 
     /**

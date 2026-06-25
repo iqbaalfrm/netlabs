@@ -1,11 +1,17 @@
-# Middleware autentikasi — JWT verification + token blacklist
-from fastapi import Depends, HTTPException
+# Middleware autentikasi — JWT verification + token blacklist + internal service key
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
-from app.config import JWT_SECRET, JWT_ALGORITHM
+from app.config import JWT_SECRET, JWT_ALGORITHM, RAG_SERVICE_KEY
 from app.database import db
 
 security = HTTPBearer()
+
+
+def _verify_service_key(request: Request) -> bool:
+    """Cek apakah request dari Laravel (internal) via X-Service-Key header."""
+    key = request.headers.get("X-Service-Key", "")
+    return bool(RAG_SERVICE_KEY and key == RAG_SERVICE_KEY)
 
 
 def _is_token_blacklisted(token: str) -> bool:
@@ -22,8 +28,25 @@ def _is_token_blacklisted(token: str) -> bool:
 
 
 async def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> dict:
+    # ── Path 1: Internal service key dari Laravel ──
+    if _verify_service_key(request):
+        user_id = request.headers.get("X-User-Id", "")
+        user_role = request.headers.get("X-User-Role", "")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="X-User-Id header wajib untuk service key")
+
+        # Ambil data user dari DB (agar tetap konsisten)
+        result = db.table("users").select("*").eq("id", user_id).single().execute()
+        if result.data:
+            return result.data
+
+        # Fallback: buat user dict minimal dari header
+        return {"id": user_id, "role": user_role or "siswa"}
+
+    # ── Path 2: JWT token normal (dari mobile app langsung) ──
     token = credentials.credentials
 
     if _is_token_blacklisted(token):

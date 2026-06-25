@@ -26,18 +26,24 @@ class ChatController extends Controller
 
         // Simpan pesan siswa ke database
         ChatHistory::create([
-            'siswa_id'      => $userId,
+            'user_id'       => $userId,
             'pertemuan_id'  => $validated['pertemuan_id'] ?? null,
             'pesan'         => $validated['pertanyaan'],
             'jawaban'       => '',
         ]);
 
-        // Forward ke RAG Service
+        // Forward ke RAG Service (dengan internal service key)
         // Backend FastAPI: POST /api/chat/tanya
         $ragUrl = env('RAG_SERVICE_URL', 'http://127.0.0.1:8000') . '/api/chat/tanya';
+        $ragKey = env('RAG_SERVICE_KEY', '');
+        $user   = auth('api')->user();
 
         try {
-            $response = Http::timeout(30)->post($ragUrl, [
+            $response = Http::timeout(30)->withHeaders([
+                'X-Service-Key' => $ragKey,
+                'X-User-Id'     => (string) $userId,
+                'X-User-Role'   => $user->role ?? 'siswa',
+            ])->post($ragUrl, [
                 'pertanyaan'     => $validated['pertanyaan'],
                 'pertemuan_id'   => $validated['pertemuan_id'] ?? null,
                 'riwayat_chat'   => $validated['riwayat_chat'] ?? [],
@@ -55,7 +61,7 @@ class ChatController extends Controller
 
         // Simpan balasan AI ke database
         $chatBalasan = ChatHistory::create([
-            'siswa_id'      => $userId,
+            'user_id'       => $userId,
             'pertemuan_id'  => $validated['pertemuan_id'] ?? null,
             'pesan'         => $validated['pertanyaan'],
             'jawaban'       => $jawaban,
@@ -71,11 +77,11 @@ class ChatController extends Controller
 
     /**
      * Riwayat chat per siswa.
-     * GET /api/chat/riwayat/{siswa_id}
+     * GET /api/chat/riwayat/{user_id}
      */
     public function riwayat($siswaId): JsonResponse
     {
-        $data = ChatHistory::where('siswa_id', $siswaId)
+        $data = ChatHistory::where('user_id', $siswaId)
                            ->orderBy('waktu')
                            ->limit(100)
                            ->get();
