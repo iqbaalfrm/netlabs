@@ -142,6 +142,49 @@ class KuisController extends Controller
     }
 
     /**
+     * Riwayat hasil kuis siswa yang sedang login.
+     * GET /api/kuis/riwayat  (tanpa parameter — ambil dari JWT)
+     */
+    public function riwayatSaya(): JsonResponse
+    {
+        $userId = auth('api')->id();
+
+        $riwayat = HasilKuis::with('pertemuan:id,judul')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $riwayat,
+            'message' => 'Riwayat kuis.',
+        ]);
+    }
+
+    /**
+     * Submit hasil kuis — pertemuan_id dari URL.
+     * POST /api/kuis/{pertemuan_id}/jawaban
+     * Body: { jawaban: [ { soal_id, jawaban }, ... ] }
+     */
+    public function submitJawaban($pertemuanId, Request $request): JsonResponse
+    {
+        $pertemuan = Pertemuan::find($pertemuanId);
+        if (! $pertemuan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pertemuan tidak ditemukan.',
+            ], 404);
+        }
+
+        // Inject pertemuan_id dari URL ke body lalu delegasikan ke submitHasil
+        $data = $request->all();
+        $data['pertemuan_id'] = $pertemuanId;
+        $request->merge(['pertemuan_id' => $pertemuanId]);
+
+        return $this->submitHasil($request);
+    }
+
+    /**
      * Submit hasil kuis.
      * POST /api/kuis/hasil
      * Alias: POST /api/kuis/jawaban

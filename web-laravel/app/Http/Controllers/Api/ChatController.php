@@ -76,6 +76,43 @@ class ChatController extends Controller
     }
 
     /**
+     * Riwayat chat siswa yang sedang login.
+     * GET /api/chat  (tanpa parameter — ambil dari JWT)
+     */
+    public function riwayatSaya(): JsonResponse
+    {
+        $userId = auth('api')->id();
+
+        $data = ChatHistory::where('user_id', $userId)
+                           ->orderBy('waktu')
+                           ->limit(100)
+                           ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $data,
+            'message' => 'Riwayat chat.',
+        ]);
+    }
+
+    /**
+     * Hapus seluruh riwayat chat siswa yang sedang login.
+     * DELETE /api/chat  (tanpa parameter — ambil dari JWT)
+     */
+    public function destroySaya(): JsonResponse
+    {
+        $userId = auth('api')->id();
+
+        ChatHistory::where('user_id', $userId)->delete();
+
+        return response()->json([
+            'success' => true,
+            'data'    => null,
+            'message' => 'Riwayat chat dihapus.',
+        ]);
+    }
+
+    /**
      * Riwayat chat per siswa.
      * GET /api/chat/riwayat/{user_id}
      * Alias: GET /api/chat?user_id=...

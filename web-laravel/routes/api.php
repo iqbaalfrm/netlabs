@@ -45,27 +45,36 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/topik/{id}',         [ApiTopik::class, 'destroy']);
     Route::post('/topik/{id}/selesai',   [ApiTopik::class, 'tandaiSelesai']);
 
-    // Kuis
-    Route::get('/kuis/{pertemuan_id}',  [ApiKuis::class, 'getSoal']);   // 5 soal random
-    Route::post('/kuis/soal',           [ApiKuis::class, 'storeSoal']);
-    Route::put('/kuis/soal/{id}',       [ApiKuis::class, 'updateSoal']);
-    Route::delete('/kuis/soal/{id}',    [ApiKuis::class, 'destroySoal']);
-    Route::post('/kuis/hasil',          [ApiKuis::class, 'submitHasil']);
-    Route::post('/kuis/jawaban',        [ApiKuis::class, 'submitHasil']); // alias
-    Route::get('/kuis/riwayat/{user_id}', [ApiKuis::class, 'riwayat']);
+    // Kuis — PENTING: route statis HARUS sebelum route ber-parameter
+    Route::get('/kuis/riwayat',                  [ApiKuis::class, 'riwayatSaya']);   // mobile: GET /api/kuis/riwayat
+    Route::get('/kuis/riwayat/{user_id}',        [ApiKuis::class, 'riwayat']);       // existing
+    Route::get('/kuis/{pertemuan_id}/soal',      [ApiKuis::class, 'getSoal']);       // mobile: GET /api/kuis/{id}/soal
+    Route::get('/kuis/{pertemuan_id}',           [ApiKuis::class, 'getSoal']);       // existing
+    Route::post('/kuis/soal',                    [ApiKuis::class, 'storeSoal']);
+    Route::put('/kuis/soal/{id}',                [ApiKuis::class, 'updateSoal']);
+    Route::delete('/kuis/soal/{id}',             [ApiKuis::class, 'destroySoal']);
+    Route::post('/kuis/hasil',                   [ApiKuis::class, 'submitHasil']);
+    Route::post('/kuis/jawaban',                 [ApiKuis::class, 'submitHasil']);   // alias
+    Route::post('/kuis/{pertemuan_id}/jawaban',  [ApiKuis::class, 'submitJawaban']); // mobile: POST /api/kuis/{id}/jawaban
 
-    // Chat AI (forward ke RAG)
-    Route::post('/chat',                       [ApiChat::class, 'send']);
-    Route::get('/chat/riwayat/{user_id}',      [ApiChat::class, 'riwayat']);
-    Route::delete('/chat/{user_id}',           [ApiChat::class, 'destroy']);
+    // Chat AI (forward ke RAG) — route statis HARUS sebelum route ber-parameter
+    Route::post('/chat',                 [ApiChat::class, 'send']);          // mobile: POST /api/chat
+    Route::get('/chat',                  [ApiChat::class, 'riwayatSaya']);   // mobile: GET /api/chat
+    Route::get('/chat/riwayat/{user_id}',[ApiChat::class, 'riwayat']);       // existing
+    Route::delete('/chat',               [ApiChat::class, 'destroySaya']);   // mobile: DELETE /api/chat
+    Route::delete('/chat/{user_id}',     [ApiChat::class, 'destroy']);       // existing
 
     // Progress Topik
-    Route::get('/progress/{pertemuan_id}',           [ApiProgress::class, 'index']);
-    Route::post('/progress/{topik_id}/selesai',      [ApiProgress::class, 'tandaiSelesai']);
+    Route::get('/progress',                      [ApiProgress::class, 'indexAll']);    // mobile: GET /api/progress
+    Route::get('/progress/{pertemuan_id}',       [ApiProgress::class, 'index']);       // existing
+    Route::post('/progress/{topik_id}/selesai',  [ApiProgress::class, 'tandaiSelesai']); // existing
+    Route::delete('/progress/{topik_id}',        [ApiProgress::class, 'reset']);       // mobile: DELETE /api/progress/{topikId}
 
-    // Nilai
-    Route::get('/nilai',                [ApiNilai::class, 'index']);
-    Route::get('/nilai/{pertemuan_id}', [ApiNilai::class, 'show']);
+    // Nilai — route statis HARUS sebelum route ber-parameter
+    Route::get('/nilai/semua',          [ApiNilai::class, 'semua']);         // mobile: GET /api/nilai/semua
+    Route::get('/nilai/siswa/{siswa_id}',[ApiNilai::class, 'siswa']);        // mobile: GET /api/nilai/siswa/{id}
+    Route::get('/nilai',                [ApiNilai::class, 'index']);         // existing
+    Route::get('/nilai/{pertemuan_id}', [ApiNilai::class, 'show']);          // existing
 
     // Modul PDF
     Route::post('/modul/upload',                [ApiModul::class, 'upload']);

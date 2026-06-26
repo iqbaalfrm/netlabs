@@ -11,6 +11,25 @@ use Illuminate\Http\Request;
 class ProgressController extends Controller
 {
     /**
+     * Ambil semua progress topik siswa yang sedang login.
+     * GET /api/progress  (tanpa parameter — ambil dari JWT)
+     */
+    public function indexAll(): JsonResponse
+    {
+        $userId = auth('api')->id();
+
+        $progress = ProgressTopik::where('user_id', $userId)
+            ->with('topik:id,pertemuan_id,judul')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $progress,
+            'message' => 'Progress semua topik.',
+        ]);
+    }
+
+    /**
      * Ambil progress topik siswa untuk satu pertemuan.
      * GET /api/progress/{pertemuan_id}
      */
@@ -73,6 +92,32 @@ class ProgressController extends Controller
             'success' => true,
             'data'    => $progress,
             'message' => 'Topik ditandai selesai.',
+        ]);
+    }
+
+    /**
+     * Reset progress topik (batalkan tandai selesai).
+     * DELETE /api/progress/{topik_id}
+     */
+    public function reset($topikId): JsonResponse
+    {
+        $userId = auth('api')->id();
+
+        $progress = ProgressTopik::where('user_id', $userId)
+            ->where('topik_id', $topikId)
+            ->first();
+
+        if ($progress) {
+            $progress->update([
+                'is_selesai'   => false,
+                'selesai_pada' => null,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => $progress,
+            'message' => 'Progress direset.',
         ]);
     }
 }
