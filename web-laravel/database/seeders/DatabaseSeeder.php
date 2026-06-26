@@ -18,8 +18,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ─── 1. Admin Guru ────────────────────────────────
+        // Guru login via email di web, tapi juga bisa via NIS di mobile (jika diperlukan).
         $guru = User::create([
-            'name'     => 'Pak Guru Netlabs',
+            'nis'      => 'GURU001',
+            'nama'     => 'Pak Guru Netlabs',
             'email'    => 'guru@netlabs.id',
             'password' => Hash::make('guru123'),
             'role'     => 'guru',
@@ -29,10 +31,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ─── 2. Siswa Dummy ──────────────────────────────
+        // Siswa login via NIS + password di aplikasi mobile.
         $siswaIds = [];
         for ($i = 1; $i <= 10; $i++) {
             $siswa = User::create([
-                'name'     => "Siswa $i",
+                'nis'      => '12345600' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                'nama'     => "Siswa $i",
                 'email'    => "siswa{$i}@netlabs.test",
                 'password' => Hash::make('password'),
                 'role'     => 'siswa',
@@ -92,7 +96,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->command->info('✅ Seeder skripsi berhasil!');
-        $this->command->info('   Login guru: guru@netlabs.id / guru123');
-        $this->command->info('   Login siswa: siswa1@netlabs.test / password');
+        $this->command->info('   Login guru (web): guru@netlabs.id / guru123');
+        $this->command->info('   Login guru (mobile - NIS): GURU001 / guru123');
+        $this->command->info('   Login siswa (mobile - NIS): 1234560001 / password');
     }
 }
