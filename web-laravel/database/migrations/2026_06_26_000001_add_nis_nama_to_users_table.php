@@ -14,22 +14,27 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Step 1: Tambah kolom nis (unique, nullable untuk guru)
         Schema::table('users', function (Blueprint $table) {
-            // Tambah kolom nis (unique, nullable untuk guru)
             if (!Schema::hasColumn('users', 'nis')) {
                 $table->string('nis')->nullable()->unique()->after('id');
             }
-
-            // Rename name → nama (jika name ada dan nama belum ada)
-            if (Schema::hasColumn('users', 'name') && !Schema::hasColumn('users', 'nama')) {
-                $table->renameColumn('name', 'nama');
-            }
-
-            // Jika nama belum ada sama sekali (fresh install tanpa name), buat kolom nama
-            if (!Schema::hasColumn('users', 'nama')) {
-                $table->string('nama')->nullable()->after('nis');
-            }
         });
+
+        // Step 2: Rename name → nama (harum dipisah agar Schema::hasColumn
+        //         melihat hasil rename sebelum cek berikutnya)
+        if (Schema::hasColumn('users', 'name') && !Schema::hasColumn('users', 'nama')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->renameColumn('name', 'nama');
+            });
+        }
+
+        // Step 3: Jika nama belum ada sama sekali (fresh install tanpa name), buat kolom nama
+        if (!Schema::hasColumn('users', 'nama')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('nama')->nullable()->after('nis');
+            });
+        }
     }
 
     public function down(): void
